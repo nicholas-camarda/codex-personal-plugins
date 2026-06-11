@@ -1,0 +1,44 @@
+{
+  "name": "codex-personal-plugins",
+  "interface": {
+    "displayName": "Codex Personal Plugins"
+  },
+  "plugins": [
+    {
+      "name": "documentation-wizard",
+      "source": {
+        "source": "local",
+        "path": "./plugins/documentation-wizard"
+      },
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "research-partner",
+      "source": {
+        "source": "local",
+        "path": "./plugins/research-partner"
+      },
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "workspace-governor",
+      "source": {
+        "source": "local",
+        "path": "./plugins/workspace-governor"
+      },
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

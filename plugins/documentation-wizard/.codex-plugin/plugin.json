@@ -1,0 +1,35 @@
+{
+  "name": "documentation-wizard",
+  "version": "0.2.0",
+  "description": "Audits documentation against verified code interfaces and generates evidence-backed drift reports.",
+  "author": {
+    "name": "Nick Camarda"
+  },
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "docs",
+    "review",
+    "drift"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Documentation Wizard",
+    "shortDescription": "Find and explain documentation drift",
+    "longDescription": "Inventories documentation surfaces, extracts real interfaces from code and schemas, reports drift with user impact, and generates lightweight regression checks.",
+    "developerName": "Nick Camarda",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Audit this repo's docs against the live CLI and config surface.",
+      "Generate a docs drift report with exact source-of-truth references.",
+      "Create a lightweight regression check for doc drift in this project."
+    ],
+    "brandColor": "#0E7490",
+    "composerIcon": "./assets/documentation-wizard-icon.svg",
+    "logo": "./assets/documentation-wizard-logo.svg"
+  }
+}

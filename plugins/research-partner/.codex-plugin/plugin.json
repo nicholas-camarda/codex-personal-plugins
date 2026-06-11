@@ -1,0 +1,41 @@
+{
+  "name": "research-partner",
+  "version": "0.1.0",
+  "description": "Global research assistant plugin for statistical, scientific, implementation, and robustness review of analysis repositories.",
+  "author": {
+    "name": "Nick Camarda",
+    "email": "ncamarda+codex@users.noreply.github.com",
+    "url": "https://github.com/ncamarda"
+  },
+  "homepage": "https://github.com/ncamarda/uveal_melanoma/tree/main/.codex/plugins/research-partner",
+  "repository": "https://github.com/ncamarda/uveal_melanoma.git",
+  "license": "MIT",
+  "keywords": [
+    "research",
+    "analysis",
+    "review",
+    "statistics",
+    "robustness"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Research Partner",
+    "shortDescription": "Skeptical review lanes for research analyses",
+    "longDescription": "A data-first review workflow for statistical validity, implementation audits, robustness tests, and literature support checks.",
+    "developerName": "Nick Camarda",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Review this analysis for statistical and implementation issues.",
+      "Check whether the code, data, and claims agree.",
+      "Design regression tests for this pipeline."
+    ],
+    "brandColor": "#0F766E",
+    "composerIcon": "./assets/research-partner-icon.svg",
+    "logo": "./assets/research-partner-logo.svg",
+    "screenshots": []
+  }
+}

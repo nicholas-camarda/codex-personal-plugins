@@ -1,0 +1,36 @@
+{
+  "name": "workspace-governor",
+  "version": "0.2.0",
+  "description": "Audits canonical workspace layout, reports rewrite candidates, and performs backup-first verified moves.",
+  "author": {
+    "name": "Nick Camarda"
+  },
+  "license": "MIT",
+  "keywords": [
+    "workspace",
+    "paths",
+    "migration",
+    "git",
+    "research"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Workspace Governor",
+    "shortDescription": "Audit and verify safe workspace moves",
+    "longDescription": "Builds machine-readable migration plans, reports stale path rewrite candidates, performs backup-first copy verification, and keeps rollback paths available when moves fail.",
+    "developerName": "Nick Camarda",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Audit my workspace layout and report safe move candidates.",
+      "Show stale hard-coded paths before we move anything.",
+      "Apply a verified migration plan and preserve rollback paths."
+    ],
+    "brandColor": "#1D4ED8",
+    "composerIcon": "./assets/workspace-governor-icon.svg",
+    "logo": "./assets/workspace-governor-logo.svg"
+  }
+}

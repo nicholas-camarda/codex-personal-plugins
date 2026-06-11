@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96">
+  <defs>
+    <linearGradient id="docLogoBg" x1="18" y1="8" x2="286" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#083344"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="docTile" x1="18" y1="16" x2="84" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F172A" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#0F172A" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="96" rx="24" fill="url(#docLogoBg)"/>
+  <circle cx="286" cy="18" r="30" fill="#ECFEFF" opacity="0.1"/>
+  <rect x="16" y="16" width="64" height="64" rx="18" fill="url(#docTile)" stroke="#ECFEFF" stroke-opacity="0.18"/>
+  <rect x="38" y="29" width="26" height="34" rx="8" fill="#67E8F9" opacity="0.26"/>
+  <path d="M34 24h24l10 10v30c0 4.418-3.582 8-8 8H34c-4.418 0-8-3.582-8-8V32c0-4.418 3.582-8 8-8Z" fill="#ECFEFF"/>
+  <path d="M58 24v10h10" fill="#A5F3FC"/>
+  <path d="M40 43h20M40 51h20M40 59h13" stroke="#0F172A" stroke-linecap="round" stroke-width="4.5"/>
+  <path d="M71 46l2.4 5 4.8 2.2-4.8 2.2-2.4 5-2.4-5-4.8-2.2 4.8-2.2Z" fill="#ECFEFF"/>
+  <text x="100" y="57" fill="#F8FAFC" font-family="Avenir Next, Trebuchet MS, sans-serif" font-size="27" font-weight="700">Documentation Wizard</text>
+</svg>
