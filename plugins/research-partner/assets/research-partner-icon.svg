@@ -1,17 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Research Partner">
   <defs>
-    <linearGradient id="researchBg" x1="14" y1="10" x2="82" y2="86" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#134E4A"/>
-      <stop offset="1" stop-color="#2DD4BF"/>
+    <linearGradient id="rp-bg" x1="11" y1="10" x2="86" y2="84" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#052E2B"/>
+      <stop offset="0.55" stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#34D399"/>
     </linearGradient>
+    <radialGradient id="rp-glow" cx="0" cy="0" r="1" gradientTransform="matrix(39 0 0 39 70 24)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CCFBF1" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#CCFBF1" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="rp-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#020617" flood-opacity="0.35"/>
+    </filter>
   </defs>
-  <rect width="96" height="96" rx="22" fill="url(#researchBg)"/>
-  <circle cx="74" cy="20" r="20" fill="#ECFDF5" opacity="0.12"/>
-  <circle cx="44" cy="44" r="15" fill="none" stroke="#F0FDFA" stroke-width="6"/>
-  <path d="M54 54l10 10" stroke="#F0FDFA" stroke-linecap="round" stroke-width="6"/>
-  <path d="M30 30 36 36M59 30 54 35M33 61 40 53" stroke="#99F6E4" stroke-linecap="round" stroke-width="3.5"/>
-  <circle cx="28" cy="28" r="6" fill="#CCFBF1"/>
-  <circle cx="64" cy="28" r="6" fill="#A7F3D0"/>
-  <circle cx="30" cy="64" r="6" fill="#5EEAD4"/>
-  <circle cx="44" cy="44" r="4" fill="#ECFDF5"/>
+  <rect width="96" height="96" rx="24" fill="url(#rp-bg)"/>
+  <circle cx="70" cy="24" r="39" fill="url(#rp-glow)"/>
+  <g filter="url(#rp-shadow)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M29 61 43 47 58 57 70 35" fill="none" stroke="#CCFBF1" stroke-width="6"/>
+    <circle cx="29" cy="61" r="8" fill="#0F172A" stroke="#99F6E4" stroke-width="5"/>
+    <circle cx="43" cy="47" r="8" fill="#0F172A" stroke="#5EEAD4" stroke-width="5"/>
+    <circle cx="58" cy="57" r="8" fill="#0F172A" stroke="#A7F3D0" stroke-width="5"/>
+    <circle cx="70" cy="35" r="8" fill="#0F172A" stroke="#F0FDFA" stroke-width="5"/>
+    <circle cx="46" cy="46" r="22" fill="none" stroke="#F0FDFA" stroke-width="6"/>
+    <path d="M62 62 73 73" stroke="#F0FDFA" stroke-width="7"/>
+  </g>
 </svg>

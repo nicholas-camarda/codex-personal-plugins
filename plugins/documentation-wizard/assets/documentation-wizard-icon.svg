@@ -1,15 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Documentation Wizard">
   <defs>
-    <linearGradient id="docBg" x1="16" y1="12" x2="82" y2="86" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#164E63"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+    <linearGradient id="dw-bg" x1="12" y1="8" x2="84" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.52" stop-color="#155E75"/>
+      <stop offset="1" stop-color="#06B6D4"/>
     </linearGradient>
+    <linearGradient id="dw-accent" x1="24" y1="20" x2="76" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F0FDFA"/>
+      <stop offset="1" stop-color="#A5F3FC"/>
+    </linearGradient>
+    <filter id="dw-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#020617" flood-opacity="0.35"/>
+    </filter>
   </defs>
-  <rect width="96" height="96" rx="22" fill="url(#docBg)"/>
-  <circle cx="72" cy="18" r="22" fill="#ECFEFF" opacity="0.12"/>
-  <rect x="30" y="24" width="32" height="40" rx="10" fill="#67E8F9" opacity="0.28"/>
-  <path d="M28 18h28l12 12v36c0 5.523-4.477 10-10 10H28c-5.523 0-10-4.477-10-10V28c0-5.523 4.477-10 10-10Z" fill="#ECFEFF"/>
-  <path d="M56 18v12h12" fill="#A5F3FC"/>
-  <path d="M32 40h24M32 50h24M32 60h16" stroke="#0F172A" stroke-linecap="round" stroke-width="5"/>
-  <path d="M67 49l2.8 5.9 5.7 2.6-5.7 2.6-2.8 5.9-2.8-5.9-5.7-2.6 5.7-2.6Z" fill="#ECFEFF"/>
+  <rect width="96" height="96" rx="24" fill="url(#dw-bg)"/>
+  <path d="M75 12c6 13 4 28-5 39S47 69 30 68C40 80 56 86 71 79s23-22 19-38C88 28 82 18 75 12Z" fill="#67E8F9" opacity="0.22"/>
+  <g filter="url(#dw-shadow)">
+    <path d="M28 18h27l15 15v40c0 5-4 9-9 9H28c-5 0-9-4-9-9V27c0-5 4-9 9-9Z" fill="url(#dw-accent)"/>
+    <path d="M55 18v14c0 2 2 4 4 4h11Z" fill="#22D3EE"/>
+    <path d="M34 43h22M34 53h26M34 63h15" stroke="#0F172A" stroke-width="5" stroke-linecap="round"/>
+    <path d="M68 51l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z" fill="#0F172A"/>
+    <path d="M68 56l1.3 3 3.2 1.4-3.2 1.4-1.3 3-1.3-3-3.2-1.4 3.2-1.4Z" fill="#67E8F9"/>
+  </g>
 </svg>
