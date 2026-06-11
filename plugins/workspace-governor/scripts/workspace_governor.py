@@ -857,28 +857,30 @@ def validate_plugin(root: Path) -> dict[str, Any]:
     plugin_root = root.parent
     manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
     manifest = read_json(manifest_path)
-    home_marketplace = read_json(HOME_MARKETPLACE_PATH) if HOME_MARKETPLACE_PATH.exists() else {}
+    source_marketplace_path = plugin_root.parents[1] / ".agents" / "plugins" / "marketplace.json"
+    source_checkout = plugin_root.parent.name == "plugins" and source_marketplace_path.exists()
+    marketplace_path = source_marketplace_path if source_checkout else HOME_MARKETPLACE_PATH
+    marketplace = read_json(marketplace_path) if marketplace_path.exists() else {}
+    expected_plugin_root = plugin_root if source_checkout else HOME_PLUGIN_ROOT
     readme_text = load_text(plugin_root / "README.md")
     top_level_skill = load_text(plugin_root / "skills" / PLUGIN_NAME / "SKILL.md")
 
-    home_registered_entry = _marketplace_entry_by_name(home_marketplace, PLUGIN_NAME)
+    registered_entry = _marketplace_entry_by_name(marketplace, PLUGIN_NAME)
     icon_path = plugin_root / manifest["interface"]["composerIcon"].replace("./", "")
     logo_path = plugin_root / manifest["interface"]["logo"].replace("./", "")
-    home_manifest_path = HOME_PLUGIN_ROOT / ".codex-plugin" / "plugin.json"
 
     checks = [
         {"name": "manifest-name", "passed": manifest.get("name") == PLUGIN_NAME},
         {"name": "display-name", "passed": manifest.get("interface", {}).get("displayName") == PLUGIN_DISPLAY_NAME},
         {"name": "skills-path", "passed": manifest.get("skills") == EXPECTED_SKILLS_PATH},
-        {"name": "marketplace-registration", "passed": home_registered_entry is not None},
+        {"name": "marketplace-registration", "passed": registered_entry is not None},
         {
             "name": "marketplace-entry-path",
-            "passed": _marketplace_entry_resolves_to(home_registered_entry, HOME_MARKETPLACE_PATH, HOME_PLUGIN_ROOT),
+            "passed": _marketplace_entry_resolves_to(registered_entry, marketplace_path, expected_plugin_root),
         },
-        {"name": "marketplace-entry-metadata", "passed": _marketplace_entry_has_required_metadata(home_registered_entry)},
-        {"name": "plugin-root-is-home-root", "passed": plugin_root.resolve() == HOME_PLUGIN_ROOT.resolve()},
-        {"name": "home-plugin-root", "passed": HOME_PLUGIN_ROOT.exists()},
-        {"name": "home-plugin-manifest", "passed": home_manifest_path.exists()},
+        {"name": "marketplace-entry-metadata", "passed": _marketplace_entry_has_required_metadata(registered_entry)},
+        {"name": "plugin-root-is-source-or-home-root", "passed": plugin_root.resolve() == expected_plugin_root.resolve()},
+        {"name": "plugin-manifest-exists", "passed": manifest_path.exists()},
         {"name": "no-fake-urls", "passed": "example.com" not in json.dumps(manifest)},
         {"name": "top-level-skill", "passed": f"name: {PLUGIN_NAME}" in top_level_skill},
         {

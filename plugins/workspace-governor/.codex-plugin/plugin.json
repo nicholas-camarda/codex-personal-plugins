@@ -18,6 +18,9 @@
     "displayName": "Workspace Governor",
     "shortDescription": "Audit and verify safe workspace moves",
     "longDescription": "Builds machine-readable migration plans, reports stale path rewrite candidates, performs backup-first copy verification, and keeps rollback paths available when moves fail.",
+    "websiteURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
+    "privacyPolicyURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
+    "termsOfServiceURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
     "developerName": "Nick Camarda",
     "category": "Productivity",
     "capabilities": [

@@ -1,6 +1,6 @@
 ---
 name: documentation-wizard
-description: Inventories documentation surfaces, extracts the real interface surface from code and schemas, and reports evidence-backed documentation drift.
+description: Use when documentation must be checked against the current code, CLI flags, schemas, paths, or public/private documentation contract.
 ---
 
 # Purpose

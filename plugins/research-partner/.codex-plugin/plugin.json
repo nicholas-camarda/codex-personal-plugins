@@ -22,6 +22,9 @@
     "displayName": "Research Partner",
     "shortDescription": "Skeptical review lanes for research analyses",
     "longDescription": "A data-first review workflow for statistical validity, implementation audits, robustness tests, and literature support checks.",
+    "websiteURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
+    "privacyPolicyURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
+    "termsOfServiceURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
     "developerName": "Nick Camarda",
     "category": "Productivity",
     "capabilities": [

@@ -1,6 +1,6 @@
 ---
 name: synthesize-review
-description: Deduplicates specialist lane outputs and turns them into one ranked final review.
+description: Use when specialist lane outputs need to be merged into one ranked final review with evidence and disagreements preserved.
 ---
 
 Use this skill for the `review-synthesizer` lane after preflight and any selected specialist lanes have produced structured outputs.

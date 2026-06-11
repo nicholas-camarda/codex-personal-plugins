@@ -26,6 +26,18 @@ def load_module(name: str, relative_path: str):
     return module
 
 
+def read_skill_description(skill_path: Path) -> str:
+    text = skill_path.read_text(encoding="utf-8")
+    in_frontmatter = False
+    for line in text.splitlines():
+        if line.strip() == "---":
+            in_frontmatter = not in_frontmatter
+            continue
+        if in_frontmatter and line.startswith("description:"):
+            return line.split(":", 1)[1].strip()
+    return ""
+
+
 RESEARCH_PARTNER = load_module(
     "research_partner_script",
     "plugins/research-partner/scripts/research_partner.py",
@@ -77,6 +89,34 @@ class PluginRegressionTests(unittest.TestCase):
         payload = json.loads(proc.stdout)
         self.assertIsInstance(payload, dict)
         return payload
+
+    def test_plugin_manifests_have_required_interface_urls(self) -> None:
+        for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
+            manifest_path = PLUGINS_ROOT / plugin_name / ".codex-plugin" / "plugin.json"
+            manifest = DEPLOY_PLUGINS.load_json(manifest_path)
+            interface = manifest.get("interface", {})
+            for key in ["websiteURL", "privacyPolicyURL", "termsOfServiceURL"]:
+                value = interface.get(key)
+                self.assertIsInstance(value, str, f"{plugin_name} missing interface.{key}")
+                self.assertTrue(
+                    value.startswith("https://github.com/nicholas-camarda/codex-personal-plugins"),
+                    f"{plugin_name} has non-project URL for {key}",
+                )
+                self.assertNotIn("example.com", value)
+
+    def test_skill_descriptions_use_clear_trigger_language(self) -> None:
+        skill_paths = sorted(
+            path
+            for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]
+            for path in (PLUGINS_ROOT / plugin_name / "skills").glob("*/SKILL.md")
+        )
+        self.assertGreater(len(skill_paths), 0)
+        for skill_path in skill_paths:
+            description = read_skill_description(skill_path)
+            self.assertTrue(
+                description.startswith("Use when "),
+                f"{skill_path.relative_to(ROOT)} description should start with 'Use when '",
+            )
 
     def test_research_partner_prefers_codex_plugins_root_for_peer_plugin(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -289,6 +329,104 @@ class PluginRegressionTests(unittest.TestCase):
         self.assertIsInstance(report["recommended_actions"], list)
         self.assertIn("flow", report)
 
+    def test_research_partner_run_executes_actual_lanes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir) / "review"
+            report = RESEARCH_PARTNER.run_review(
+                repo_root=FIXTURES_ROOT / "research_repo",
+                output_dir=output_dir,
+            )
+
+            self.assertEqual(report["scope"], "multi-lane-review")
+            self.assertEqual(report["command"], "run")
+            self.assertEqual(report["status"], "ok")
+            self.assertIn("lane_outputs", report)
+            lane_names = {item["lane"] for item in report["lane_outputs"]}
+            self.assertEqual(
+                lane_names,
+                {
+                    "documentation-wizard",
+                    "implementation-auditor",
+                    "stats-reviewer",
+                    "scientific-reviewer",
+                    "literature-support-reviewer",
+                    "robustness-test-designer",
+                },
+            )
+            for lane in report["lane_outputs"]:
+                path = Path(lane["path"])
+                self.assertTrue(path.exists(), lane)
+                payload = DEPLOY_PLUGINS.load_json(path)
+                self.assertEqual(payload["lane"], lane["lane"])
+                self.assertIn("artifact_map", payload)
+                self.assertIn("findings", payload)
+                self.assertIn("recommended_actions", payload)
+            self.assertTrue((output_dir / "preflight.json").exists())
+            self.assertTrue((output_dir / "bundle.json").exists())
+
+    def test_research_partner_bundle_preserves_lane_provenance_for_same_title(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            preflight = tmp / "preflight.json"
+            lane_one = tmp / "implementation.json"
+            lane_two = tmp / "stats.json"
+            preflight.write_text(
+                json.dumps(
+                    {
+                        "scope": "analysis-review-preflight",
+                        "artifact_map": {},
+                        "findings": [],
+                        "required_tests_checks": [],
+                        "recommended_actions": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            lane_one.write_text(
+                json.dumps(
+                    {
+                        "lane": "implementation-auditor",
+                        "artifact_map": {},
+                        "findings": [
+                            {
+                                "title": "Shared concern",
+                                "severity": "P2",
+                                "message": "Implementation message",
+                                "lane": "implementation-auditor",
+                            }
+                        ],
+                        "required_tests_checks": [],
+                        "recommended_actions": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            lane_two.write_text(
+                json.dumps(
+                    {
+                        "lane": "stats-reviewer",
+                        "artifact_map": {},
+                        "findings": [
+                            {
+                                "title": "Shared concern",
+                                "severity": "P1",
+                                "message": "Statistical message",
+                                "lane": "stats-reviewer",
+                            }
+                        ],
+                        "required_tests_checks": [],
+                        "recommended_actions": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            bundle = RESEARCH_PARTNER.bundle_review(preflight, [lane_one, lane_two])
+
+        shared = [finding for finding in bundle["findings"] if finding.get("title") == "Shared concern"]
+        self.assertEqual(len(shared), 2)
+        self.assertEqual({finding["lane"] for finding in shared}, {"implementation-auditor", "stats-reviewer"})
+
     def test_research_partner_keeps_generic_repo_topology_low_confidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir) / "generic_python_repo"
@@ -396,6 +534,30 @@ class PluginRegressionTests(unittest.TestCase):
         self.assertEqual(report["scope"], "analysis-review-preflight")
         self.assertIn("flow", report)
         self.assertIsInstance(report["recommended_actions"], list)
+
+    def test_installed_research_partner_run_executes_lanes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            home_root = tmp / "home"
+            output_dir = tmp / "review"
+            home_root.mkdir(parents=True)
+            payload = self.install_plugins_for_test(home_root)
+            self.assertEqual(payload["status"], "ok")
+
+            report = self.run_installed_plugin(
+                home_root,
+                "research-partner",
+                "run",
+                "--repo",
+                str(FIXTURES_ROOT / "research_repo"),
+                "--output-dir",
+                str(output_dir),
+            )
+
+        self.assertEqual(report["command"], "run")
+        self.assertEqual(report["status"], "ok")
+        self.assertEqual(report["scope"], "multi-lane-review")
+        self.assertEqual(len(report["lane_outputs"]), 6)
 
     def test_installed_workspace_governor_executes_on_research_fixture(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

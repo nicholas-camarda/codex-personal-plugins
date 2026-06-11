@@ -1,11 +1,13 @@
 ---
 name: research-partner
-description: Orchestrates a data-first, multi-lane review of research analyses using actual project data, runtime artifacts, published outputs, and implementation details before external methodological commentary.
+description: Use when a research analysis, manuscript claim, repository, or pipeline needs a data-first multi-lane review grounded in local artifacts.
 ---
 
 # Purpose
 
 Use this skill to review one analysis, a manuscript-facing claim, a set of scripts, or an entire repository.
+
+Default to `scripts/research_partner.py run --repo <repo> --output-dir <dir>` for end-to-end review execution. Use `inventory` only when the user explicitly wants preflight without lane execution, and use `bundle` only when lane JSON files were produced elsewhere.
 
 This skill acts as a skeptical research partner.
 It should reason from the actual project data and implementation first, then add methodological and literature support.

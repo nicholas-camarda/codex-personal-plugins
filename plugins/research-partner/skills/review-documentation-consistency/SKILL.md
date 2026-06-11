@@ -1,6 +1,6 @@
 ---
 name: review-documentation-consistency
-description: Reviews whether manuscript, README, methods prose, and operational docs match the live code, schema, and file-path surface.
+description: Use when manuscripts, READMEs, methods prose, or operational docs must be checked against live code, schemas, and paths.
 ---
 
 Use this skill for the `documentation-wizard` lane inside `@research-partner`.

@@ -1,6 +1,6 @@
 ---
 name: review-scientific-interpretation
-description: Reviews interpretation, bias, and generalizability relative to the actual cohort, design, and measurements.
+description: Use when claims, interpretation, bias, or generalizability must be reviewed against the actual cohort, design, and measurements.
 ---
 
 Use this skill for the `scientific-reviewer` lane.

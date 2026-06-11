@@ -1,6 +1,6 @@
 ---
 name: workspace-governor
-description: Audits canonical workspace layout, enforces the public/private docs contract, and performs backup-first verified moves plus publish previews.
+description: Use when workspace paths, canonical research layout, public/private docs, migration plans, or publish previews need audit or verification.
 ---
 
 # Purpose

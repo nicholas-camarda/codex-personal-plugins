@@ -1,6 +1,6 @@
 ---
 name: design-robustness-tests
-description: Designs tests that catch non-regressive, scientifically meaningful failure modes in analyses and pipelines.
+description: Use when an analysis needs tests that catch scientifically meaningful implementation, estimand, data, or artifact regressions.
 ---
 
 Design:

@@ -17,6 +17,9 @@
     "displayName": "Documentation Wizard",
     "shortDescription": "Find and explain documentation drift",
     "longDescription": "Inventories documentation surfaces, extracts real interfaces from code and schemas, reports drift with user impact, and generates lightweight regression checks.",
+    "websiteURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
+    "privacyPolicyURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
+    "termsOfServiceURL": "https://github.com/nicholas-camarda/codex-personal-plugins",
     "developerName": "Nick Camarda",
     "category": "Productivity",
     "capabilities": [

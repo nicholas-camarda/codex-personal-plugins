@@ -1,6 +1,6 @@
 ---
 name: review-implementation-validity
-description: Reviews whether the code actually implements the claimed method and output generation correctly.
+description: Use when code must be checked against the claimed method, target estimand, generated outputs, and repository workflow.
 ---
 
 Assess:

@@ -1,6 +1,6 @@
 ---
 name: inspect-analysis-artifacts
-description: Reconstructs the actual analysis inputs, outputs, code path, and artifact locations before any methods review.
+description: Use when analysis inputs, outputs, code paths, runtime artifacts, and published outputs must be reconstructed before review.
 ---
 
 Use this skill first when reviewing an analysis.

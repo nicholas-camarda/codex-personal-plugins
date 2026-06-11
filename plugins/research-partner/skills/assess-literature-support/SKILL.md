@@ -1,6 +1,6 @@
 ---
 name: assess-literature-support
-description: Assesses peer-reviewed and practical support for the chosen methods in the specific scientific and implementation context.
+description: Use when method choices need literature and practical support assessed against the actual scientific question, data, and implementation.
 ---
 
 Assess whether support is:
