@@ -5,11 +5,11 @@ from pathlib import Path
 from typing import Any
 
 from .git_io import read_json
-from .metadata import load_text
-from .roots import (
-    _marketplace_entry_by_name,
-    _marketplace_entry_has_required_metadata,
-    _marketplace_entry_resolves_to,
+from .metadata_parse import load_text
+from .roots_marketplace import (
+    marketplace_entry_by_name as _marketplace_entry_by_name,
+    marketplace_entry_has_required_metadata as _marketplace_entry_has_required_metadata,
+    marketplace_entry_resolves_to as _marketplace_entry_resolves_to,
 )
 
 PLUGIN_NAME = "workspace-governor"

@@ -5,12 +5,13 @@ from pathlib import Path
 from typing import Any
 
 from .classify import parse_classifications, parse_repo_kind
+from .commands_assess_summary import assessment_outcome, related_audit_records
 from .commands_audit import audit
 from .git_io import write_json
-from .metadata import infer_project_profile
+from .metadata_profile import infer_project_profile
 from .paths import now_stamp, normalized_project_slug
 from .planning import build_dry_run_plan
-from .publish import build_publish_report
+from .publish_report import build_publish_report
 from .roots import DEFAULT_SCAN_ROOTS
 
 
@@ -44,38 +45,18 @@ def assess(args: argparse.Namespace) -> dict[str, Any]:
     }
 
     repo_slug = normalized_project_slug(repo_root)
-    related_audit_records = [
-        record
-        for record in audit_report["records"]
-        if record.get("slug") == repo_slug
-        or record.get("source") == str(repo_root)
-        or record.get("destination")
-        in {
-            dry_run_report.get("proposed_destination"),
-            dry_run_report.get("proposed_code_root"),
-        }
-    ]
+    related_records = related_audit_records(audit_report, repo_slug, str(repo_root), dry_run_report)
     workspace_plan = audit_report.get("plan", [])
     workspace_move_count = len(workspace_plan) if isinstance(workspace_plan, list) else 0
     dry_run_rewrite_count = len(dry_run_report.get("rewrite_candidates", []))
     doc_contract_passed = dry_run_report.get("doc_contract", {}).get("passed")
     publish_requires_doc_review = publish_preview_report.get("requires_doc_review")
-
-    if workspace_move_count > 0:
-        assessment_outcome = "workspace-moves-planned"
-        next_step = "review move plan before apply"
-    elif dry_run_rewrite_count > 0:
-        assessment_outcome = "rewrite-review-needed"
-        next_step = "review rewrite candidates; no workspace apply is needed"
-    elif publish_requires_doc_review:
-        assessment_outcome = "publish-doc-review-needed"
-        next_step = "review public-doc sanitization findings; no workspace apply is needed"
-    elif not doc_contract_passed:
-        assessment_outcome = "doc-contract-missing"
-        next_step = "add missing README or AGENTS.md before publish; no workspace apply is needed"
-    else:
-        assessment_outcome = "no-migration-work-planned"
-        next_step = "no workspace apply is needed"
+    assessment_outcome_value, next_step = assessment_outcome(
+        workspace_move_count,
+        dry_run_rewrite_count,
+        publish_requires_doc_review,
+        doc_contract_passed,
+    )
 
     payload = {
         "command": "assess",
@@ -85,7 +66,7 @@ def assess(args: argparse.Namespace) -> dict[str, Any]:
         "repo_slug": repo_slug,
         "dry_run": dry_run_report,
         "audit": audit_report,
-        "related_audit_records": related_audit_records,
+        "related_audit_records": related_records,
         "publish_preview": publish_preview_report,
         "summary": {
             "dry_run_question_count": len(dry_run_report.get("questions", [])),
@@ -98,10 +79,10 @@ def assess(args: argparse.Namespace) -> dict[str, Any]:
             "skipped_publish_candidate_count": len(
                 publish_preview_report.get("publish_candidates", {}).get("skipped", [])
             ),
-            "related_workspace_record_count": len(related_audit_records),
+            "related_workspace_record_count": len(related_records),
             "workspace_move_count": workspace_move_count,
             "apply_recommended": workspace_move_count > 0,
-            "assessment_outcome": assessment_outcome,
+            "assessment_outcome": assessment_outcome_value,
             "next_step": next_step,
         },
     }

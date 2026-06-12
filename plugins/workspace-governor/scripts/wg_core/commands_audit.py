@@ -7,7 +7,7 @@ from typing import Any
 from .classify import parse_classifications, parse_repo_kind
 from .destination import child_dirs
 from .git_io import write_json
-from .metadata import infer_project_profile
+from .metadata_profile import infer_project_profile
 from .paths import now_stamp
 from .planning import build_audit_payload, build_dry_run_plan, classify_candidate
 from .roots import DEFAULT_SCAN_ROOTS

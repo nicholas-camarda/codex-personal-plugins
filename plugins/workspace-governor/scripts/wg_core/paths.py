@@ -1,53 +1,18 @@
 from __future__ import annotations
 
-import os
-import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .metadata import extract_list, metadata_value, read_metadata_texts, slugify
-from .publish import DEFAULT_PUBLISH_LAYOUT
-from .roots import (
-    GENERAL_REPO_CLOUD_ROOT,
-    RESEARCH_ROOT,
-    RUNTIME_ROOT,
-    SIDEPROJECTS_ROOT,
-)
+from .metadata_parse import metadata_value, slugify
+from .metadata_registry import read_metadata_texts
+from .metadata_yaml import extract_list
+from .paths_constants import IGNORED_AUDIT_CHILD_DIRS, IGNORED_PUBLIC_DOC_PARTS, SAFE_PROJECT_NAME_RE, TEXT_SUFFIXES
+from .paths_public_docs import public_doc_paths
+from .paths_scan import iter_repo_files
+from .publish_deny import DEFAULT_PUBLISH_LAYOUT
+from .roots import GENERAL_REPO_CLOUD_ROOT, RESEARCH_ROOT, RUNTIME_ROOT, SIDEPROJECTS_ROOT
 
 DEFAULT_PUBLISH_ROOT_NAME = "Analysis"
-SAFE_PROJECT_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
-TEXT_SUFFIXES = {
-    ".py", ".R", ".r", ".qmd", ".ipynb", ".md", ".txt", ".yaml", ".yml",
-    ".json", ".toml", ".ini", ".cfg", ".sh",
-}
-IGNORED_PUBLIC_DOC_PARTS = {
-    "archive",
-    ".agent-os",
-    ".codex",
-    "node_modules",
-    ".git",
-    ".history",
-    ".venv",
-    "venv",
-    "__pycache__",
-    ".pytest_cache",
-    ".mypy_cache",
-    "migration_backups",
-}
-IGNORED_AUDIT_CHILD_DIRS = {
-    "archive",
-    ".agent-os",
-    ".codex",
-    "node_modules",
-    ".git",
-    ".history",
-    ".venv",
-    "venv",
-    "__pycache__",
-    ".pytest_cache",
-    ".mypy_cache",
-    "migration_backups",
-}
 
 
 def canonical_project_name(text: str) -> str:
@@ -118,42 +83,3 @@ def configured_publish_layout(repo_root: Path) -> tuple[str, str]:
 
 def project_publish_denylist(repo_root: Path) -> tuple[list[str], str | None]:
     return metadata_list(repo_root, "publish_denylist")
-
-
-def iter_repo_files(repo_root: Path, suffixes: set[str] | None = None) -> list[Path]:
-    files: list[Path] = []
-    for dirpath, dirnames, filenames in os.walk(repo_root):
-        dirnames[:] = [
-            name
-            for name in dirnames
-            if not name.startswith(".") and name.lower() not in IGNORED_AUDIT_CHILD_DIRS
-        ]
-        current = Path(dirpath)
-        for filename in filenames:
-            path = current / filename
-            if suffixes is not None and path.suffix.lower() not in suffixes:
-                continue
-            files.append(path)
-    return sorted(files)
-
-
-def public_doc_paths(repo_root: Path) -> list[Path]:
-    docs: list[Path] = []
-    for path in iter_repo_files(repo_root, TEXT_SUFFIXES):
-        rel_path = path.relative_to(repo_root)
-        rel_parts = {part.lower() for part in rel_path.parts}
-        if any(part.startswith(".") for part in rel_path.parts[:-1]):
-            continue
-        if rel_parts & IGNORED_PUBLIC_DOC_PARTS:
-            continue
-        name = path.name.lower()
-        if path.suffix.lower() not in TEXT_SUFFIXES:
-            continue
-        rel = rel_path.as_posix()
-        if rel == "AGENTS.md":
-            continue
-        if ".local." in name or any(part.lower() in {"internal", "private"} for part in rel_path.parts):
-            continue
-        if rel.startswith("docs/") or path.name.upper().startswith(("README", "CHANGELOG", "CONTRIBUTING", "SECURITY")):
-            docs.append(path)
-    return docs

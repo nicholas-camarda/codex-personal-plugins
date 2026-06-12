@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .metadata import slugify
+from .metadata_parse import slugify
 
 
 def parse_classifications(values: list[str]) -> dict[str, dict[str, str]]:
