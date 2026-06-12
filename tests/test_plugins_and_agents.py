@@ -783,6 +783,17 @@ class PluginEvalRegressionTests(unittest.TestCase):
             self.assertIn("coverage", text)
             self.assertIn("line-rate", text)
 
+    def test_research_partner_trigger_budget_is_not_heavy(self) -> None:
+        if not PLUGIN_EVAL_JS.exists():
+            self.skipTest("plugin-eval not installed")
+        from scripts.plugin_eval_regression import run_plugin_eval_json
+
+        payload = run_plugin_eval_json(PLUGINS_ROOT / "research-partner", PLUGIN_EVAL_JS)
+        band = payload["budgets"]["trigger_cost_tokens"]["band"]
+        self.assertIn(band, {"good", "moderate"}, f"trigger band is {band}")
+        warn_ids = {check["id"] for check in payload["checks"] if check.get("status") == "warn"}
+        self.assertNotIn("trigger_cost_tokens-budget-high", warn_ids)
+
 
 if __name__ == "__main__":
     unittest.main()
