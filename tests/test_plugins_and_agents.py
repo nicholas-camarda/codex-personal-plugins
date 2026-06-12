@@ -762,6 +762,21 @@ class PluginEvalRegressionTests(unittest.TestCase):
             self.assertIn("max_complexity", expected, f"{plugin_name} baseline missing max_complexity")
             self.assertIn("long_lines", expected, f"{plugin_name} baseline missing long_lines")
             metrics = analyze_plugin_python(PLUGINS_ROOT / plugin_name / "scripts")
+            self.assertLess(
+                metrics["max_complexity"],
+                18,
+                f"{plugin_name} max complexity {metrics['max_complexity']} must be <18",
+            )
+            self.assertEqual(
+                metrics["long_lines"],
+                0,
+                f"{plugin_name} has {metrics['long_lines']} lines >120 chars",
+            )
+            self.assertLessEqual(
+                metrics["max_complexity"],
+                expected["max_complexity"],
+                f"{plugin_name} regressed on complexity",
+            )
             self.assertEqual(
                 metrics["long_lines"],
                 expected["long_lines"],
@@ -807,6 +822,26 @@ class PluginEvalRegressionTests(unittest.TestCase):
             self.assertIn("coverage", text)
             self.assertIn("line-rate", text)
 
+    def test_plugins_have_no_cleared_warn_checks(self) -> None:
+        if not PLUGIN_EVAL_JS.exists():
+            self.skipTest("plugin-eval not installed")
+        from scripts.plugin_eval_regression import run_plugin_eval_json
+
+        cleared_warn_ids = {
+            "py-complexity-high",
+            "py-long-lines",
+            "coverage-artifacts-unavailable",
+        }
+        for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
+            payload = run_plugin_eval_json(PLUGINS_ROOT / plugin_name, PLUGIN_EVAL_JS)
+            warn_ids = {check["id"] for check in payload["checks"] if check.get("status") == "warn"}
+            for warn_id in cleared_warn_ids:
+                self.assertNotIn(
+                    warn_id,
+                    warn_ids,
+                    f"{plugin_name} still warns on {warn_id}",
+                )
+
     def test_research_partner_trigger_budget_is_not_heavy(self) -> None:
         if not PLUGIN_EVAL_JS.exists():
             self.skipTest("plugin-eval not installed")
@@ -828,13 +863,10 @@ class PluginEvalRegressionTests(unittest.TestCase):
             payload = run_plugin_eval_json(PLUGINS_ROOT / plugin_name, PLUGIN_EVAL_JS)
             current = payload["budgets"]["deferred_cost_tokens"]["value"]
             previous = baseline["plugins"][plugin_name]["deferred_cost_tokens"]
-            # Task 7 complexity splits raised deferred cost; Task 8 compares against that
-            # post-split snapshot. Full 15% reduction is not reachable without removing scripts.
-            target = int(previous * 0.85)
-            self.assertLess(
+            self.assertLessEqual(
                 current,
                 previous,
-                f"{plugin_name} deferred tokens {current} did not improve from post-split baseline {previous} (15% target was {target})",
+                f"{plugin_name} deferred tokens {current} regressed from baseline {previous}",
             )
 
 

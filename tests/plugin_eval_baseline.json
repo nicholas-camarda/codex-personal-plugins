@@ -1,37 +1,38 @@
 {
   "plugins": {
     "documentation-wizard": {
-      "score": null,
-      "max_complexity": 81,
+      "score": 87,
+      "max_complexity": 17,
       "long_lines": 0,
       "trigger_cost_tokens": 109,
-      "deferred_cost_tokens": 22935,
+      "deferred_cost_tokens": 22206,
       "warn_check_ids": [
+        "coverage-low",
         "deferred_cost_tokens-budget-high",
-        "py-complexity-high"
+        "py-tests-missing"
       ]
     },
     "research-partner": {
-      "score": null,
-      "max_complexity": 72,
+      "score": 91,
+      "max_complexity": 16,
       "long_lines": 0,
-      "trigger_cost_tokens": 356,
-      "deferred_cost_tokens": 22972,
+      "trigger_cost_tokens": 106,
+      "deferred_cost_tokens": 22097,
       "warn_check_ids": [
         "deferred_cost_tokens-budget-high",
-        "py-complexity-high",
-        "trigger_cost_tokens-budget-high"
+        "py-tests-missing"
       ]
     },
     "workspace-governor": {
-      "score": null,
-      "max_complexity": 253,
+      "score": 87,
+      "max_complexity": 17,
       "long_lines": 0,
       "trigger_cost_tokens": 104,
-      "deferred_cost_tokens": 52916,
+      "deferred_cost_tokens": 52280,
       "warn_check_ids": [
+        "coverage-low",
         "deferred_cost_tokens-budget-high",
-        "py-complexity-high"
+        "py-tests-missing"
       ]
     }
   }
