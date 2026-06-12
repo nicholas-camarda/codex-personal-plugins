@@ -6,7 +6,6 @@ import re
 from pathlib import Path
 from typing import Any
 
-from . import _host
 from .roots import (
     GENERAL_REPO_CLOUD_ROOT,
     LEGACY_ROOT,

@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from . import _host
+from .roots import DEFAULT_BACKUP_ROOT
 
 def copytree_verified(src: Path, dst: Path) -> None:
     shutil.copytree(src, dst, symlinks=True, copy_function=shutil.copy2)
