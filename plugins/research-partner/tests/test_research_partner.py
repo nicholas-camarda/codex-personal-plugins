@@ -37,6 +37,16 @@ class ResearchPartnerLocalTests(unittest.TestCase):
         self.assertEqual(report["status"], "ok")
         self.assertEqual(len(report["lane_outputs"]), 6)
 
+    def test_single_lane_run_executes_only_requested_lane(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir) / "single-lane"
+            report = RESEARCH_PARTNER.run_review(
+                WORKSPACE_ROOT / "tests" / "fixtures" / "research_repo",
+                output_dir,
+                lanes=["stats-reviewer"],
+            )
+        self.assertEqual([item["lane"] for item in report["lane_outputs"]], ["stats-reviewer"])
+
 
 if __name__ == "__main__":
     unittest.main()

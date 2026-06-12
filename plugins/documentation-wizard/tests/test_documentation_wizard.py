@@ -39,6 +39,21 @@ class DocumentationWizardLocalTests(unittest.TestCase):
             files = DOCUMENTATION_WIZARD.iter_files(root, {".md"})
         self.assertEqual([path.relative_to(root).as_posix() for path in files], ["docs/guide.md"])
 
+    def test_stale_cli_flag_golden(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir) / "cli-doc-drift"
+            (repo_root / "scripts").mkdir(parents=True)
+            (repo_root / "README.md").write_text(
+                "# CLI\n\nRun `python scripts/tool.py --old-flag`.\n",
+                encoding="utf-8",
+            )
+            (repo_root / "scripts" / "tool.py").write_text(
+                "import argparse\nparser = argparse.ArgumentParser()\nparser.add_argument('--new-flag')\n",
+                encoding="utf-8",
+            )
+            report = DOCUMENTATION_WIZARD.build_report(repo_root)
+        self.assertIn("stale-cli-flag", [item["kind"] for item in report["findings"]])
+
 
 if __name__ == "__main__":
     unittest.main()

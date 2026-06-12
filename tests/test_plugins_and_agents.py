@@ -322,6 +322,61 @@ class PluginRegressionTests(unittest.TestCase):
         self.assertNotIn("stale-cli-flag", finding_kinds)
         self.assertNotIn("stale-config-key", finding_kinds)
 
+    def test_documentation_wizard_reports_stale_cli_flag_with_source_refs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir) / "cli-doc-drift"
+            (repo_root / "scripts").mkdir(parents=True)
+            (repo_root / "docs").mkdir()
+            (repo_root / "README.md").write_text(
+                "# CLI\n\nRun `python scripts/tool.py --old-flag`.\n",
+                encoding="utf-8",
+            )
+            (repo_root / "scripts" / "tool.py").write_text(
+                "\n".join(
+                    [
+                        "import argparse",
+                        "parser = argparse.ArgumentParser()",
+                        "parser.add_argument('--new-flag', action='store_true')",
+                        "if __name__ == '__main__':",
+                        "    parser.parse_args()",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            report = DOCUMENTATION_WIZARD.build_report(repo_root)
+
+        stale_flags = [item for item in report["findings"] if item.get("kind") == "stale-cli-flag"]
+        self.assertEqual(len(stale_flags), 1)
+        self.assertEqual(stale_flags[0]["doc_ref"], "README.md:3")
+        self.assertEqual(stale_flags[0]["source_ref"], "scripts/tool.py:3")
+        self.assertIn("--old-flag", stale_flags[0]["message"])
+        self.assertIn("--new-flag", stale_flags[0]["patch_direction"])
+
+    def test_documentation_wizard_sanitize_public_docs_preserves_agents_path_truth(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir) / "sanitize-fixture"
+            repo_root.mkdir()
+            public_path = repo_root / "README.md"
+            agents_path = repo_root / "AGENTS.md"
+            public_path.write_text(
+                "Artifacts live at /Users/example/Library/CloudStorage/OneDrive-Personal/Research/project/output/result.csv\n",
+                encoding="utf-8",
+            )
+            agents_path.write_text(
+                "runtime_home: /Users/example/ProjectsRuntime/project\n",
+                encoding="utf-8",
+            )
+
+            preview = DOCUMENTATION_WIZARD.sanitize_public_docs(repo_root, write=True)
+            public_text = public_path.read_text(encoding="utf-8")
+            agents_text = agents_path.read_text(encoding="utf-8")
+
+        self.assertGreaterEqual(preview["changed_files"], 1)
+        self.assertIn("output/result.csv", public_text)
+        self.assertIn("/Users/example/ProjectsRuntime/project", agents_text)
+
     def test_workspace_governor_assess_smoke_on_research_fixture(self) -> None:
         repo_root = FIXTURES_ROOT / "research_repo"
         payload = WORKSPACE_GOVERNOR.assess(
@@ -382,6 +437,36 @@ class PluginRegressionTests(unittest.TestCase):
                 self.assertIn("recommended_actions", payload)
             self.assertTrue((output_dir / "preflight.json").exists())
             self.assertTrue((output_dir / "bundle.json").exists())
+
+    def test_research_partner_single_lane_run_writes_only_requested_lane(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir) / "single-lane"
+            report = RESEARCH_PARTNER.run_review(
+                repo_root=FIXTURES_ROOT / "research_repo",
+                output_dir=output_dir,
+                lanes=["stats-reviewer"],
+            )
+
+            lane_outputs = report["lane_outputs"]
+            self.assertEqual([item["lane"] for item in lane_outputs], ["stats-reviewer"])
+            self.assertTrue((output_dir / "preflight.json").exists())
+            self.assertTrue((output_dir / "stats-reviewer.json").exists())
+            self.assertFalse((output_dir / "implementation-auditor.json").exists())
+            self.assertTrue((output_dir / "bundle.json").exists())
+
+    def test_research_partner_lane_findings_include_lane_and_evidence_basis(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir) / "review"
+            report = RESEARCH_PARTNER.run_review(
+                repo_root=FIXTURES_ROOT / "research_repo",
+                output_dir=output_dir,
+            )
+
+            lane_findings = [finding for finding in report["findings"] if finding.get("lane")]
+            self.assertGreater(len(lane_findings), 0)
+            for finding in lane_findings:
+                self.assertIsInstance(finding.get("lane"), str)
+                self.assertIn(finding.get("evidence_basis"), {"Direct", "Inference", "Missing"})
 
     def test_research_partner_bundle_preserves_lane_provenance_for_same_title(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -476,6 +561,43 @@ class PluginRegressionTests(unittest.TestCase):
         self.assertIsNone(dry_run["proposed_destination"])
         self.assertFalse(dry_run["doc_contract"]["required"])
         self.assertEqual(dry_run["doc_contract"]["message"], "Dual-doc contract is advisory for general software repos.")
+
+    def test_workspace_governor_publish_candidate_split_layout_maps_manifest_with_year(self) -> None:
+        candidate = WORKSPACE_GOVERNOR.map_publish_candidate(
+            "data/raw/source_manifest.json",
+            "split-data-flat-analysis-v1",
+            2026,
+        )
+
+        self.assertEqual(
+            candidate,
+            {
+                "destination_scope": "cloud_home",
+                "destination_relative_path": "data/raw/manifests/source_manifest_2026.json",
+            },
+        )
+
+    def test_workspace_governor_general_repo_assessment_has_no_move_plan(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir) / "general-tool"
+            repo_root.mkdir()
+            (repo_root / "README.md").write_text("# General Tool\n", encoding="utf-8")
+            (repo_root / "pyproject.toml").write_text("[project]\nname = 'general-tool'\n", encoding="utf-8")
+
+            payload = WORKSPACE_GOVERNOR.assess(
+                argparse.Namespace(
+                    repo=str(repo_root),
+                    classify=[],
+                    kind=None,
+                    roots=[str(repo_root.parent)],
+                    snapshot_id="golden-001",
+                    output=None,
+                )
+            )
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["dry_run"]["profile_guess"], "general")
+        self.assertEqual(payload["audit"]["plan"], [])
 
     def test_documentation_wizard_extracts_click_and_typer_flags(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

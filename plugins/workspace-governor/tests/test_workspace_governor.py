@@ -40,6 +40,15 @@ class WorkspaceGovernorLocalTests(unittest.TestCase):
         self.assertEqual(payload["command"], "assess")
         self.assertEqual(payload["status"], "ok")
 
+    def test_split_layout_manifest_candidate_golden(self) -> None:
+        candidate = WORKSPACE_GOVERNOR.map_publish_candidate(
+            "data/raw/source_manifest.json",
+            "split-data-flat-analysis-v1",
+            2026,
+        )
+        self.assertEqual(candidate["destination_scope"], "cloud_home")
+        self.assertEqual(candidate["destination_relative_path"], "data/raw/manifests/source_manifest_2026.json")
+
 
 if __name__ == "__main__":
     unittest.main()
