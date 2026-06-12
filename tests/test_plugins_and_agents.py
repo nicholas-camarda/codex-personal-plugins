@@ -787,6 +787,18 @@ class PluginEvalRegressionTests(unittest.TestCase):
             f"worst file {worst['path']} scored {worst['complexity']}",
         )
 
+    def test_documentation_wizard_plugin_eval_complexity_under_threshold(self) -> None:
+        from scripts.plugin_eval_regression import analyze_plugin_python
+
+        metrics = analyze_plugin_python(PLUGINS_ROOT / "documentation-wizard" / "scripts")
+        self.assertLess(metrics["max_complexity"], 18)
+
+    def test_research_partner_plugin_eval_complexity_under_threshold(self) -> None:
+        from scripts.plugin_eval_regression import analyze_plugin_python
+
+        metrics = analyze_plugin_python(PLUGINS_ROOT / "research-partner" / "scripts")
+        self.assertLess(metrics["max_complexity"], 18)
+
     def test_plugins_have_local_coverage_artifacts(self) -> None:
         for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
             coverage_path = PLUGINS_ROOT / plugin_name / "coverage.xml"
