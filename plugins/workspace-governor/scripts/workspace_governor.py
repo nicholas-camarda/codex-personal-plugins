@@ -51,7 +51,8 @@ from wg_core.git_io import (
     tree_signature,
     write_json,
 )
-from wg_core.metadata import infer_project_profile, load_text, parse_metadata_text, slugify
+from wg_core.metadata import infer_project_profile, load_text, parse_metadata_text
+from wg_core.metadata_parse import slugify
 from wg_core.paths import (
     canonical_project_name,
     configured_cloud_home,
