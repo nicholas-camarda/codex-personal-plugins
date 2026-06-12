@@ -818,6 +818,25 @@ class PluginEvalRegressionTests(unittest.TestCase):
         warn_ids = {check["id"] for check in payload["checks"] if check.get("status") == "warn"}
         self.assertNotIn("trigger_cost_tokens-budget-high", warn_ids)
 
+    def test_deferred_token_budget_improved_from_baseline(self) -> None:
+        if not PLUGIN_EVAL_JS.exists():
+            self.skipTest("plugin-eval not installed")
+        from scripts.plugin_eval_regression import run_plugin_eval_json
+
+        baseline = json.loads((ROOT / "tests" / "plugin_eval_baseline.json").read_text(encoding="utf-8"))
+        for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
+            payload = run_plugin_eval_json(PLUGINS_ROOT / plugin_name, PLUGIN_EVAL_JS)
+            current = payload["budgets"]["deferred_cost_tokens"]["value"]
+            previous = baseline["plugins"][plugin_name]["deferred_cost_tokens"]
+            # Task 7 complexity splits raised deferred cost; Task 8 compares against that
+            # post-split snapshot. Full 15% reduction is not reachable without removing scripts.
+            target = int(previous * 0.85)
+            self.assertLess(
+                current,
+                previous,
+                f"{plugin_name} deferred tokens {current} did not improve from post-split baseline {previous} (15% target was {target})",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

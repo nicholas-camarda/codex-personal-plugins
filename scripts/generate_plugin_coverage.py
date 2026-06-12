@@ -13,7 +13,7 @@ PLUGINS = [
 
 def generate_for_plugin(repo_root: Path, plugin_name: str) -> Path:
     source = f"plugins/{plugin_name}/scripts"
-    test_dir = f"plugins/{plugin_name}/tests"
+    test_dir = f"tests/plugins/{plugin_name}"
     output = repo_root / "plugins" / plugin_name / "coverage.xml"
     subprocess.run(
         [

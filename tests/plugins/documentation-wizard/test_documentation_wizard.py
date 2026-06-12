@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE_ROOT = ROOT.parents[1]
+WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
+ROOT = WORKSPACE_ROOT / "plugins" / "documentation-wizard"
 
 
 def load_module():

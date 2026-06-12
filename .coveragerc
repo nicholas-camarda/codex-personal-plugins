@@ -12,3 +12,4 @@ skip_empty = True
 omit =
     */__pycache__/*
     */tests/*
+    tests/plugins/*

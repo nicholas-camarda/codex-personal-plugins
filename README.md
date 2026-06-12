@@ -96,9 +96,9 @@ python -m unittest tests/test_plugins_and_agents.py
 Run plugin-local suites:
 
 ```bash
-python -m unittest discover -s plugins/documentation-wizard/tests -v
-python -m unittest discover -s plugins/research-partner/tests -v
-python -m unittest discover -s plugins/workspace-governor/tests -v
+python -m unittest discover -s tests/plugins/documentation-wizard -v
+python -m unittest discover -s tests/plugins/research-partner -v
+python -m unittest discover -s tests/plugins/workspace-governor -v
 ```
 
 Run plugin validators:
