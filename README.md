@@ -109,6 +109,13 @@ python plugins/research-partner/scripts/research_partner.py validate
 python plugins/workspace-governor/scripts/workspace_governor.py validate
 ```
 
+Generate coverage artifacts for Plugin Eval:
+
+```bash
+python -m coverage run -m unittest discover
+python -m coverage xml
+```
+
 Run the research-partner smoke review:
 
 ```bash

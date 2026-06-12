@@ -1,0 +1,14 @@
+[run]
+branch = True
+source =
+    plugins/documentation-wizard/scripts
+    plugins/research-partner/scripts
+    plugins/workspace-governor/scripts
+    scripts
+
+[report]
+show_missing = True
+skip_empty = True
+omit =
+    */__pycache__/*
+    */tests/*
