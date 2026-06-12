@@ -157,5 +157,6 @@ RESEARCH_ROOT = _resolve_root("CODEX_RESEARCH_ROOT", ONEDRIVE_ROOT / "Research")
 SIDEPROJECTS_ROOT = _resolve_root("CODEX_SIDEPROJECTS_ROOT", ONEDRIVE_ROOT / "SideProjects")
 GENERAL_REPO_CLOUD_ROOT = _resolve_root("CODEX_CLOUD_PROJECTS_ROOT", ONEDRIVE_ROOT / "Projects")
 LEGACY_ROOT = _resolve_root("CODEX_LEGACY_ROOT", ONEDRIVE_ROOT / "Desktop" / "coding")
+DEFAULT_SCAN_ROOTS = [LEGACY_ROOT, PROJECTS_ROOT, RUNTIME_ROOT, RESEARCH_ROOT, SIDEPROJECTS_ROOT]
 DEFAULT_BACKUP_ROOT = RUNTIME_ROOT / "workspace-governor" / "backups"
 DOC_WIZARD_SCRIPT = _peer_plugin_script("documentation-wizard", "documentation_wizard.py")

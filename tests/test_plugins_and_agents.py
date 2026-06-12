@@ -775,6 +775,18 @@ class PluginEvalRegressionTests(unittest.TestCase):
             metrics = analyze_plugin_python(PLUGINS_ROOT / plugin_name / "scripts")
             self.assertEqual(metrics["long_lines"], 0, plugin_name)
 
+    def test_workspace_governor_plugin_eval_complexity_under_threshold(self) -> None:
+        from scripts.plugin_eval_regression import analyze_plugin_python
+
+        metrics = analyze_plugin_python(PLUGINS_ROOT / "workspace-governor" / "scripts")
+        self.assertLess(metrics["max_complexity"], 18)
+        worst = max(metrics["files"], key=lambda item: item["complexity"])
+        self.assertLess(
+            worst["complexity"],
+            18,
+            f"worst file {worst['path']} scored {worst['complexity']}",
+        )
+
     def test_plugins_have_local_coverage_artifacts(self) -> None:
         for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
             coverage_path = PLUGINS_ROOT / plugin_name / "coverage.xml"
