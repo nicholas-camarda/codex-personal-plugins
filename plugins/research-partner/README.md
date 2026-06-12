@@ -73,16 +73,23 @@ Similarly, `@research-partner` does not imply that every lane always runs automa
 Run `scripts/research_partner.py` with one of:
 
 - `inventory --repo <path>`
+- `run --repo <path> --output-dir <dir> [--lane <name>]`
 - `bundle --preflight <json> --lane <json> [...]`
 - `validate`
 
-`validate` confirms the home plugin bundle is in place.
-Keep the single source tree for this plugin at `~/.codex/plugins/research-partner`.
-Use the personal marketplace at `~/.agents/plugins/marketplace.json`; do not maintain a second repo-local plugin copy.
+`validate` confirms the plugin bundle is registered and its manifest, skills, dependencies, and assets are present.
 
-## Deployment
+## Source And Deployment
 
-From the home plugin workspace root (`~/.codex/plugins`), run `python3 scripts/deploy_plugins.py install` to refresh the personal marketplace manifest under `~/.agents/plugins/marketplace.json`. This workflow keeps `~/.codex/plugins` as the only source tree and does not copy plugins into a second location.
+This repository is the source of truth. Installed copies under `~/.codex/plugins/<plugin-name>` are deploy targets.
+
+From the repository root, run:
+
+```bash
+python scripts/deploy_plugins.py install --source-root . --home ~
+```
+
+The deploy script copies this plugin into `~/.codex/plugins/research-partner` and refreshes the personal marketplace at `~/.agents/plugins/marketplace.json`.
 
 ## Limits
 

@@ -118,6 +118,25 @@ class PluginRegressionTests(unittest.TestCase):
                 f"{skill_path.relative_to(ROOT)} description should start with 'Use when '",
             )
 
+    def test_plugin_readmes_describe_repo_as_source_of_truth(self) -> None:
+        forbidden_fragments = [
+            "Keep the single source tree for this plugin at `~/.codex/plugins",
+            "From the home plugin workspace root (`~/.codex/plugins`)",
+            "does not copy plugins into a second location",
+            "do not maintain a second repo-local plugin copy",
+        ]
+        required_fragments = [
+            "This repository is the source of truth",
+            "Installed copies under `~/.codex/plugins/<plugin-name>` are deploy targets",
+            "python scripts/deploy_plugins.py install --source-root . --home ~",
+        ]
+        for readme_path in sorted(PLUGINS_ROOT.glob("*/README.md")):
+            text = readme_path.read_text(encoding="utf-8")
+            for fragment in forbidden_fragments:
+                self.assertNotIn(fragment, text, f"{readme_path.relative_to(ROOT)} contains stale source wording")
+            for fragment in required_fragments:
+                self.assertIn(fragment, text, f"{readme_path.relative_to(ROOT)} missing current source wording")
+
     def test_research_partner_prefers_codex_plugins_root_for_peer_plugin(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
