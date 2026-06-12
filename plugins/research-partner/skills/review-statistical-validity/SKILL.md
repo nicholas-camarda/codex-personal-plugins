@@ -3,15 +3,10 @@ name: review-statistical-validity
 description: Use when statistical methods must be checked against the actual design, data structure, outcome, and claimed question.
 ---
 
-Assess:
-- estimand or prediction target
-- outcome type
-- time origin, censoring, competing risks if relevant
-- missing data
-- sparse events / rare levels / identifiability
-- multiplicity
-- clustering / repeated measures
-- calibration / discrimination / transportability if relevant
-- exploratory vs confirmatory framing
+# Purpose
 
-Always ground the critique in the actual data and implementation.
+Use this lane when statistical methods must be checked against the actual design, data structure, outcome, and claimed question.
+
+Read `references/review-lanes.md` for lane selection, evidence standards, and shared output expectations.
+
+Return findings with lane name, severity, evidence basis, concrete implication, required checks, and recommended actions.

@@ -3,20 +3,10 @@ name: synthesize-review
 description: Use when specialist lane outputs need to be merged into one ranked final review with evidence and disagreements preserved.
 ---
 
-Use this skill for the `review-synthesizer` lane after preflight and any selected specialist lanes have produced structured outputs.
+# Purpose
 
-Ground the synthesis with `scripts/research_partner.py bundle`.
+Use this lane when specialist lane outputs need to be merged into one ranked final review with evidence and disagreements preserved.
 
-Required output contract:
-- `Scope`
-- `Artifact map / evidence reviewed`
-- `Findings`
-- `Direct evidence vs inference`
-- `Required tests / checks`
-- `Recommended actions`
+Read `references/review-lanes.md` for lane selection, evidence standards, and shared output expectations.
 
-The synthesis should:
-- merge duplicates across lanes
-- keep the strongest direct evidence attached to each finding
-- preserve uncertainty and lane disagreement
-- end with an action list ordered by dependency and severity
+Return findings with lane name, severity, evidence basis, concrete implication, required checks, and recommended actions.

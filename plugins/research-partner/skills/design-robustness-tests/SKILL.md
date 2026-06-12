@@ -3,19 +3,10 @@ name: design-robustness-tests
 description: Use when an analysis needs tests that catch scientifically meaningful implementation, estimand, data, or artifact regressions.
 ---
 
-Design:
-- unit tests
-- integration tests
-- regression tests
-- perturbation tests
-- invariance tests
-- simulation and falsification tests
+# Purpose
 
-Prioritize tests that detect:
-- silent data loss
-- incorrect endpoint assignment
-- incorrect censoring logic
-- instability from sparse categories
-- row-order dependence
-- path-dependent output changes
-- drift between runtime and published outputs
+Use this lane when an analysis needs tests that catch scientifically meaningful implementation, estimand, data, or artifact regressions.
+
+Read `references/review-lanes.md` for lane selection, evidence standards, and shared output expectations.
+
+Return findings with lane name, severity, evidence basis, concrete implication, required checks, and recommended actions.

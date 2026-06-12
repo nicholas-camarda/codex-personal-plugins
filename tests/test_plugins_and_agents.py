@@ -118,6 +118,24 @@ class PluginRegressionTests(unittest.TestCase):
                 f"{skill_path.relative_to(ROOT)} description should start with 'Use when '",
             )
 
+    def test_skills_are_compact_and_reference_detailed_policy_files(self) -> None:
+        expectations = {
+            "documentation-wizard": ["references/documentation-policy.md"],
+            "research-partner": ["references/review-lanes.md"],
+            "workspace-governor": ["references/workspace-policy.md"],
+        }
+        for plugin_name, reference_paths in expectations.items():
+            plugin_root = PLUGINS_ROOT / plugin_name
+            skill_files = sorted((plugin_root / "skills").glob("*/SKILL.md"))
+            self.assertGreater(len(skill_files), 0)
+            combined = "\n".join(path.read_text(encoding="utf-8") for path in skill_files)
+            for reference_path in reference_paths:
+                self.assertTrue((plugin_root / reference_path).exists(), reference_path)
+                self.assertIn(reference_path, combined)
+            for skill_file in skill_files:
+                line_count = len(skill_file.read_text(encoding="utf-8").splitlines())
+                self.assertLessEqual(line_count, 75, f"{skill_file.relative_to(ROOT)} is too long")
+
     def test_plugin_readmes_describe_repo_as_source_of_truth(self) -> None:
         forbidden_fragments = [
             "Keep the single source tree for this plugin at `~/.codex/plugins",
