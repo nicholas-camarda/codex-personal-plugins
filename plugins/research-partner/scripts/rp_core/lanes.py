@@ -108,7 +108,11 @@ def _repo_files(root: Path, suffixes: set[str]) -> list[str]:
 
 def implementation_auditor_lane(root: Path, preflight: dict[str, Any]) -> dict[str, Any]:
     scripts = list(preflight.get("artifact_map", {}).get("scripts_and_tests", []))
-    test_files = [path for path in scripts if "/tests/" in f"/{path}" or path.startswith("tests/") or Path(path).name.startswith("test_")]
+    test_files = [
+        path
+        for path in scripts
+        if "/tests/" in f"/{path}" or path.startswith("tests/") or Path(path).name.startswith("test_")
+    ]
     code_files = [path for path in scripts if path.endswith((".py", ".R", ".r", ".sh")) and path not in test_files]
     findings: list[dict[str, Any]] = []
     actions: list[str] = []
@@ -122,7 +126,10 @@ def implementation_auditor_lane(root: Path, preflight: dict[str, Any]) -> dict[s
                 "lane": "implementation-auditor",
             }
         )
-        actions.append("Add tests or smoke checks for the executable analysis scripts before trusting implementation claims.")
+        actions.append(
+            "Add tests or smoke checks for the executable analysis scripts before trusting "
+            "implementation claims."
+        )
     return lane_payload(
         lane="implementation-auditor",
         root=root,
@@ -130,14 +137,20 @@ def implementation_auditor_lane(root: Path, preflight: dict[str, Any]) -> dict[s
         findings=findings,
         required_tests_checks=["Run the analysis smoke command and the repository test suite, if present."],
         recommended_actions=actions,
-        direct_evidence_vs_inference="This lane is grounded in files discovered by preflight; method correctness still requires manual code review.",
+        direct_evidence_vs_inference=(
+            "This lane is grounded in files discovered by preflight; method correctness still "
+            "requires manual code review."
+        ),
     )
 
 
 def stats_reviewer_lane(root: Path, preflight: dict[str, Any]) -> dict[str, Any]:
     analysis_files = _repo_files(root, {".py", ".r", ".qmd", ".ipynb"})
     text = "\n".join(read_text(root / path) for path in analysis_files if not path.endswith(".ipynb"))
-    method_terms = sorted(set(re.findall(r"\b(cox|logistic|linear|regression|bootstrap|kaplan|survival|auc|calibration|pvalue|p-value)\b", text, flags=re.I)))
+    method_pattern = (
+        r"\b(cox|logistic|linear|regression|bootstrap|kaplan|survival|auc|calibration|pvalue|p-value)\b"
+    )
+    method_terms = sorted(set(re.findall(method_pattern, text, flags=re.I)))
     findings: list[dict[str, Any]] = []
     actions: list[str] = []
     if analysis_files and not method_terms:
@@ -146,7 +159,10 @@ def stats_reviewer_lane(root: Path, preflight: dict[str, Any]) -> dict[str, Any]
                 "title": "Statistical method target is not explicit in code text",
                 "severity": "P3",
                 "evidence_basis": "Inference",
-                "message": "Analysis files were present, but the lightweight scan did not find explicit statistical method terms.",
+                "message": (
+                    "Analysis files were present, but the lightweight scan did not find explicit "
+                    "statistical method terms."
+                ),
                 "lane": "stats-reviewer",
             }
         )
@@ -156,16 +172,22 @@ def stats_reviewer_lane(root: Path, preflight: dict[str, Any]) -> dict[str, Any]
         root=root,
         artifact_map={"analysis_files": analysis_files, "method_terms": method_terms},
         findings=findings,
-        required_tests_checks=["Check estimand alignment, outcome type, missingness handling, calibration, and sensitivity analyses."],
+        required_tests_checks=[
+            "Check estimand alignment, outcome type, missingness handling, calibration, and sensitivity analyses.",
+        ],
         recommended_actions=actions,
-        direct_evidence_vs_inference="This lane uses a lightweight repository scan and flags missing evidence; it does not replace a full statistical review.",
+        direct_evidence_vs_inference=(
+            "This lane uses a lightweight repository scan and flags missing evidence; "
+            "it does not replace a full statistical review."
+        ),
     )
 
 
 def scientific_reviewer_lane(root: Path, preflight: dict[str, Any]) -> dict[str, Any]:
     doc_files = _repo_files(root, {".md", ".mdx", ".rst", ".txt", ".qmd"})
     text = "\n".join(read_text(root / path) for path in doc_files)
-    causal_terms = sorted(set(re.findall(r"\b(causes?|causal|effect|impact|proves?|predicts?|prognostic)\b", text, flags=re.I)))
+    causal_pattern = r"\b(causes?|causal|effect|impact|proves?|predicts?|prognostic)\b"
+    causal_terms = sorted(set(re.findall(causal_pattern, text, flags=re.I)))
     findings: list[dict[str, Any]] = []
     actions: list[str] = []
     if causal_terms:
@@ -174,19 +196,31 @@ def scientific_reviewer_lane(root: Path, preflight: dict[str, Any]) -> dict[str,
                 "title": "Interpretive claim language needs design support check",
                 "severity": "P2",
                 "evidence_basis": "Direct",
-                "message": "Public or project docs include causal, predictive, or prognostic language that must be checked against design and validation evidence.",
+                "message": (
+                    "Public or project docs include causal, predictive, or prognostic language that "
+                    "must be checked against design and validation evidence."
+                ),
                 "lane": "scientific-reviewer",
             }
         )
-        actions.append("Classify each claim as descriptive, associational, causal, predictive, or prognostic before reporting it.")
+        actions.append(
+            "Classify each claim as descriptive, associational, causal, predictive, or prognostic "
+            "before reporting it."
+        )
     return lane_payload(
         lane="scientific-reviewer",
         root=root,
         artifact_map={"doc_files": doc_files, "claim_terms": causal_terms},
         findings=findings,
-        required_tests_checks=["Verify cohort definition, measurement validity, bias risks, and external validity before accepting interpretation."],
+        required_tests_checks=[
+            "Verify cohort definition, measurement validity, bias risks, and external validity "
+            "before accepting interpretation.",
+        ],
         recommended_actions=actions,
-        direct_evidence_vs_inference="This lane is grounded in local prose and flags claim language that requires scientific interpretation review.",
+        direct_evidence_vs_inference=(
+            "This lane is grounded in local prose and flags claim language that requires "
+            "scientific interpretation review."
+        ),
     )
 
 
@@ -200,19 +234,30 @@ def literature_support_lane(root: Path, preflight: dict[str, Any]) -> dict[str, 
                 "title": "Literature support context is under-specified",
                 "severity": "P3",
                 "evidence_basis": "Missing",
-                "message": "No analysis_registry.yaml was discovered, so domain and method context for literature support is incomplete.",
+                "message": (
+                    "No analysis_registry.yaml was discovered, so domain and method context for "
+                    "literature support is incomplete."
+                ),
                 "lane": "literature-support-reviewer",
             }
         )
-        actions.append("Add or update analysis_registry.yaml with project type, domain, and analysis context before literature support review.")
+        actions.append(
+            "Add or update analysis_registry.yaml with project type, domain, and analysis context "
+            "before literature support review."
+        )
     return lane_payload(
         lane="literature-support-reviewer",
         root=root,
         artifact_map={"analysis_registry": registry_path},
         findings=findings,
-        required_tests_checks=["Tie any literature citation to the actual design, population, endpoint, and implementation details."],
+        required_tests_checks=[
+            "Tie any literature citation to the actual design, population, endpoint, and implementation details.",
+        ],
         recommended_actions=actions,
-        direct_evidence_vs_inference="This lane checks whether enough local context exists for a literature support review; it does not perform external literature search.",
+        direct_evidence_vs_inference=(
+            "This lane checks whether enough local context exists for a literature support review; "
+            "it does not perform external literature search."
+        ),
     )
 
 
@@ -220,7 +265,10 @@ def robustness_test_designer_lane(root: Path, preflight: dict[str, Any]) -> dict
     scripts = list(preflight.get("artifact_map", {}).get("scripts_and_tests", []))
     findings: list[dict[str, Any]] = []
     actions = [
-        "Add regression tests for artifact presence, schema stability, documented path assumptions, and one representative analysis smoke run."
+        (
+            "Add regression tests for artifact presence, schema stability, documented path assumptions, "
+            "and one representative analysis smoke run."
+        )
     ]
     if scripts:
         findings.append(
@@ -228,7 +276,10 @@ def robustness_test_designer_lane(root: Path, preflight: dict[str, Any]) -> dict
                 "title": "Robustness test targets identified",
                 "severity": "P3",
                 "evidence_basis": "Direct",
-                "message": "Executable files were found and should be covered by smoke or regression tests tied to scientific failure modes.",
+                "message": (
+                    "Executable files were found and should be covered by smoke or regression tests "
+                    "tied to scientific failure modes."
+                ),
                 "lane": "robustness-test-designer",
             }
         )
@@ -237,7 +288,9 @@ def robustness_test_designer_lane(root: Path, preflight: dict[str, Any]) -> dict
         root=root,
         artifact_map={"scripts_and_tests": scripts},
         findings=findings,
-        required_tests_checks=["Add at least one failure-mode test for stale paths, stale artifacts, and output schema drift."],
+        required_tests_checks=[
+            "Add at least one failure-mode test for stale paths, stale artifacts, and output schema drift.",
+        ],
         recommended_actions=actions,
         direct_evidence_vs_inference="This lane derives test targets from preflight inventory and the repository tree.",
     )

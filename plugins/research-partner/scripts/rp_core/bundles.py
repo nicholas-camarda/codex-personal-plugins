@@ -49,13 +49,22 @@ def bundle_review(preflight_path: Path, lane_paths: list[Path]) -> dict[str, Any
             if not isinstance(finding, dict):
                 continue
             existing = merged.get(finding_key(finding))
-            if existing is None or SEVERITY_ORDER.get(finding.get("severity", "P3"), 3) < SEVERITY_ORDER.get(existing.get("severity", "P3"), 3):
+            finding_severity = SEVERITY_ORDER.get(finding.get("severity", "P3"), 3)
+            if existing is None or finding_severity < SEVERITY_ORDER.get(
+                existing.get("severity", "P3"), 3
+            ):
                 merged[finding_key(finding)] = finding
     for finding in preflight.get("findings", []):
         if isinstance(finding, dict):
             merged.setdefault(finding_key(finding), finding)
 
-    findings = sorted(merged.values(), key=lambda item: (SEVERITY_ORDER.get(item.get("severity", "P3"), 3), item.get("title") or item.get("message") or ""))
+    findings = sorted(
+        merged.values(),
+        key=lambda item: (
+            SEVERITY_ORDER.get(item.get("severity", "P3"), 3),
+            item.get("title") or item.get("message") or "",
+        ),
+    )
     recommended_actions = []
     for lane in [preflight, *lanes]:
         for action in lane.get("recommended_actions", []):
@@ -66,8 +75,13 @@ def bundle_review(preflight_path: Path, lane_paths: list[Path]) -> dict[str, Any
         "scope": preflight.get("scope", "multi-lane-review"),
         "artifact_map": artifact_map,
         "findings": findings,
-        "direct_evidence_vs_inference": "This bundle preserves each lane's evidence basis and deduplicates overlapping findings by lane and title/message.",
-        "required_tests_checks": sorted({check for lane in [preflight, *lanes] for check in lane.get("required_tests_checks", [])}),
+        "direct_evidence_vs_inference": (
+            "This bundle preserves each lane's evidence basis and deduplicates overlapping "
+            "findings by lane and title/message."
+        ),
+        "required_tests_checks": sorted(
+            {check for lane in [preflight, *lanes] for check in lane.get("required_tests_checks", [])}
+        ),
         "recommended_actions": recommended_actions,
         "flow": DEFAULT_FLOW,
         "evidence_bundle": evidence_sources,

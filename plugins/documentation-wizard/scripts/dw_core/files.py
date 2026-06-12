@@ -40,7 +40,9 @@ def iter_files(root: Path, suffixes: set[str]) -> list[Path]:
         ]
         current = Path(dirpath)
         rel_dir = current.relative_to(root)
-        if rel_dir != Path(".") and any(part.startswith(".") or part.lower() in NON_PUBLIC_SEGMENTS for part in rel_dir.parts):
+        if rel_dir != Path(".") and any(
+            part.startswith(".") or part.lower() in NON_PUBLIC_SEGMENTS for part in rel_dir.parts
+        ):
             continue
         for filename in filenames:
             path = current / filename

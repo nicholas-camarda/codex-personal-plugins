@@ -11,7 +11,11 @@ from .roots import PROJECTS_ROOT, RUNTIME_ROOT
 
 RUNTIME_NAME_RE = re.compile(r"(runtime|scratch|tmp|temp|cache|intermediate|work)", re.I)
 
-def build_dry_run_plan(repo_root: Path, profile: dict[str, Any], classifications: dict[str, dict[str, str]] | None = None) -> dict[str, Any]:
+def build_dry_run_plan(
+    repo_root: Path,
+    profile: dict[str, Any],
+    classifications: dict[str, dict[str, str]] | None = None,
+) -> dict[str, Any]:
     wg = _host.wg()
     classification = (classifications or {}).get(wg.slugify(repo_root.name))
     destination = wg.suggested_destination(repo_root.name, profile, classification)
@@ -89,7 +93,11 @@ def classify_candidate(path: Path, classifications: dict[str, dict[str, str]]) -
     destination = None
     reason = None
     if classification:
-        destination = wg.suggested_destination(path.name, {"profile_guess": classification["kind"], "research_domain": classification["domain"]}, classification)
+        destination = wg.suggested_destination(
+            path.name,
+            {"profile_guess": classification["kind"], "research_domain": classification["domain"]},
+            classification,
+        )
         reason = f"explicit {classification['kind']} classification"
     elif git is not None:
         destination = PROJECTS_ROOT / canonical_name

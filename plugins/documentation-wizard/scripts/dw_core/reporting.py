@@ -138,7 +138,11 @@ def build_report(root: Path) -> dict[str, Any]:
         if flag in cli_flags:
             continue
         suggestion = closest_match(flag, sorted(cli_flags))
-        patch = f"Replace `{flag}` with `{suggestion}` in {doc_ref.split(':', 1)[0]}" if suggestion else f"Remove or correct `{flag}` in {doc_ref.split(':', 1)[0]}"
+        doc_name = doc_ref.split(":", 1)[0]
+        if suggestion:
+            patch = f"Replace `{flag}` with `{suggestion}` in {doc_name}"
+        else:
+            patch = f"Remove or correct `{flag}` in {doc_name}"
         findings.append(
             {
                 "kind": "stale-cli-flag",
@@ -230,7 +234,10 @@ def build_report(root: Path) -> dict[str, Any]:
             "source_truth_candidates": inventory["source_truth_candidates"],
         },
         "findings": findings,
-        "direct_evidence_vs_inference": "All findings in this report are grounded in repo files, argparse definitions, JSON schema files, and filesystem checks.",
+        "direct_evidence_vs_inference": (
+            "All findings in this report are grounded in repo files, argparse definitions, "
+            "JSON schema files, and filesystem checks."
+        ),
         "required_tests_checks": [
             "Run the generated regression check for the highest-risk drift class.",
         ],
@@ -248,7 +255,11 @@ def build_regression_check(root: Path, kind: str) -> dict[str, Any]:
             "set -euo pipefail",
             "# generated from documentation_wizard.py report",
             f"report_json=$({command})",
-            f'echo "$report_json" | python3 -c \'import json,sys; data=json.load(sys.stdin); bad=[f for f in data.get("findings", []) if f.get("kind") == "{failure_kind}"]; raise SystemExit(1 if bad else 0)\'',
+            (
+                'echo "$report_json" | python3 -c \'import json,sys; data=json.load(sys.stdin); '
+                f'bad=[f for f in data.get("findings", []) if f.get("kind") == "{failure_kind}"]; '
+                "raise SystemExit(1 if bad else 0)'"
+            ),
         ]
     )
     return {"repo_root": str(root), "kind": kind, "script": script}

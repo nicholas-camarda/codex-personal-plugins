@@ -168,8 +168,14 @@ def find_private_infra_leaks(root: Path) -> list[dict[str, Any]]:
                         "doc_ref": f"{rel_path}:{line_number}",
                         "source_ref": "public-doc-policy",
                         "message": f"Public doc exposes maintainer-specific infrastructure detail `{matched_text}`.",
-                        "impact": "Collaborators see maintainer-only storage topology instead of portable setup guidance.",
-                        "patch_direction": f"Replace `{matched_text}` with `{replacement}` in {rel_path} and keep the concrete path in AGENTS.md or internal docs.",
+                        "impact": (
+                            "Collaborators see maintainer-only storage topology instead of "
+                            "portable setup guidance."
+                        ),
+                        "patch_direction": (
+                            f"Replace `{matched_text}` with `{replacement}` in {rel_path} "
+                            "and keep the concrete path in AGENTS.md or internal docs."
+                        ),
                         "replacement": replacement,
                     }
                 )

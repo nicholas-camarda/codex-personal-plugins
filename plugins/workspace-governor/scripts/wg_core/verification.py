@@ -126,9 +126,12 @@ def apply_plan(args: argparse.Namespace) -> dict[str, Any]:
             wg.write_json(Path(args.output), manifest)
         return manifest
 
-    backup_root = Path(args.backup_root or DEFAULT_BACKUP_ROOT).expanduser().resolve() / audit_payload.get("generated_at", wg.now_stamp())
+    generated_at = audit_payload.get("generated_at", wg.now_stamp())
+    backup_root = Path(args.backup_root or DEFAULT_BACKUP_ROOT).expanduser().resolve() / generated_at
     backup_root.mkdir(parents=True, exist_ok=True)
-    results = [apply_one(item, backup_root, audit_payload.get("generated_at", wg.now_stamp())) for item in plan if isinstance(item, dict)]
+    results = [
+        apply_one(item, backup_root, generated_at) for item in plan if isinstance(item, dict)
+    ]
     failures = [item for item in results if item["status"] in {"failed", "cleanup-failed"}]
 
     manifest = {
@@ -193,7 +196,9 @@ def verify_manifest(args: argparse.Namespace) -> dict[str, Any]:
         if pre_git is not None and dst.exists():
             destination_git = wg.git_status(dst)
             check["destination_git"] = destination_git
-            if not destination_git or destination_git.get("head") != pre_git.get("head") or destination_git.get("porcelain") != pre_git.get("porcelain"):
+            head_mismatch = destination_git and destination_git.get("head") != pre_git.get("head")
+            porcelain_mismatch = destination_git and destination_git.get("porcelain") != pre_git.get("porcelain")
+            if not destination_git or head_mismatch or porcelain_mismatch:
                 failures.append(f"Git mismatch after move: {dst}")
 
         if args.test_command and dst.exists():

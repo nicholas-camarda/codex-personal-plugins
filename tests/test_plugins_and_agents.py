@@ -768,6 +768,13 @@ class PluginEvalRegressionTests(unittest.TestCase):
                 f"{plugin_name} long_lines regressed from baseline",
             )
 
+    def test_plugin_python_has_no_lines_over_120_chars(self) -> None:
+        from scripts.plugin_eval_regression import analyze_plugin_python
+
+        for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
+            metrics = analyze_plugin_python(PLUGINS_ROOT / plugin_name / "scripts")
+            self.assertEqual(metrics["long_lines"], 0, plugin_name)
+
     def test_plugins_have_local_coverage_artifacts(self) -> None:
         for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
             coverage_path = PLUGINS_ROOT / plugin_name / "coverage.xml"

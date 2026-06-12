@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import Any
 
 HOME = Path.home()
-ONEDRIVE_ROOT = Path(os.environ.get("CODEX_ONEDRIVE_ROOT", HOME / "Library" / "CloudStorage" / "OneDrive-Personal")).expanduser()
+ONEDRIVE_ROOT = Path(
+    os.environ.get("CODEX_ONEDRIVE_ROOT", HOME / "Library" / "CloudStorage" / "OneDrive-Personal")
+).expanduser()
 PROJECTS_ROOT = Path(os.environ.get("CODEX_PROJECTS_ROOT", HOME / "Projects")).expanduser()
 RUNTIME_ROOT = Path(os.environ.get("CODEX_RUNTIME_ROOT", HOME / "ProjectsRuntime")).expanduser()
 RESEARCH_ROOT = Path(os.environ.get("CODEX_RESEARCH_ROOT", ONEDRIVE_ROOT / "Research")).expanduser()
@@ -167,7 +169,10 @@ def append_workspace_findings(
                 "message": "The workspace-governor dry-run handoff did not produce usable path-topology evidence.",
             }
         )
-        add_unique_action(recommended_actions, "Restore workspace-governor dry-run evidence before trusting workspace path assumptions.")
+        add_unique_action(
+            recommended_actions,
+            "Restore workspace-governor dry-run evidence before trusting workspace path assumptions.",
+        )
         return
 
     if payload.get("questions"):
@@ -176,10 +181,16 @@ def append_workspace_findings(
                 "title": "Workspace topology remains unresolved",
                 "severity": "P2",
                 "evidence_basis": "Direct",
-                "message": "workspace-governor dry-run reported unresolved workspace questions that should be answered before specialist review relies on path assumptions.",
+                "message": (
+                    "workspace-governor dry-run reported unresolved workspace questions that should be "
+                    "answered before specialist review relies on path assumptions."
+                ),
             }
         )
-        add_unique_action(recommended_actions, "Review the workspace-governor dry-run questions before running specialist review lanes.")
+        add_unique_action(
+            recommended_actions,
+            "Review the workspace-governor dry-run questions before running specialist review lanes.",
+        )
 
     if payload.get("doc_contract", {}).get("passed") is False:
         findings.append(
@@ -187,10 +198,16 @@ def append_workspace_findings(
                 "title": "Public/private doc contract is incomplete",
                 "severity": "P2",
                 "evidence_basis": "Direct",
-                "message": "workspace-governor dry-run found that the repo does not fully satisfy the README plus AGENTS.md documentation split.",
+                "message": (
+                    "workspace-governor dry-run found that the repo does not fully satisfy the "
+                    "README plus AGENTS.md documentation split."
+                ),
             }
         )
-        add_unique_action(recommended_actions, "Fix the README and AGENTS.md doc contract before relying on published path guidance.")
+        add_unique_action(
+            recommended_actions,
+            "Fix the README and AGENTS.md doc contract before relying on published path guidance.",
+        )
 
     if payload.get("rewrite_candidates"):
         findings.append(
@@ -198,7 +215,13 @@ def append_workspace_findings(
                 "title": "Stale hard-coded path assumptions detected",
                 "severity": "P2",
                 "evidence_basis": "Direct",
-                "message": "workspace-governor dry-run found path rewrite candidates that may invalidate implementation or methods assumptions.",
+                "message": (
+                    "workspace-governor dry-run found path rewrite candidates that may invalidate "
+                    "implementation or methods assumptions."
+                ),
             }
         )
-        add_unique_action(recommended_actions, "Review workspace-governor rewrite candidates before interpreting path-sensitive outputs.")
+        add_unique_action(
+            recommended_actions,
+            "Review workspace-governor rewrite candidates before interpreting path-sensitive outputs.",
+        )

@@ -162,7 +162,10 @@ def validate_plugin(root: Path) -> dict[str, Any]:
             "passed": marketplace_entry_resolves_to(registered_entry, marketplace_path, expected_plugin_root),
         },
         {"name": "marketplace-entry-metadata", "passed": marketplace_entry_has_required_metadata(registered_entry)},
-        {"name": "plugin-root-is-source-or-home-root", "passed": plugin_root.resolve() == expected_plugin_root.resolve()},
+        {
+            "name": "plugin-root-is-source-or-home-root",
+            "passed": plugin_root.resolve() == expected_plugin_root.resolve(),
+        },
         {"name": "plugin-manifest-exists", "passed": manifest_path.exists()},
         {"name": "no-fake-urls", "passed": "example.com" not in json.dumps(manifest)},
         {"name": "top-level-skill", "passed": f"name: {PLUGIN_NAME}" in top_level_skill},
@@ -178,10 +181,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="documentation-wizard helper")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    inventory_parser = subparsers.add_parser("inventory", help="List documentation surfaces and source-of-truth candidates")
+    inventory_parser = subparsers.add_parser(
+        "inventory",
+        help="List documentation surfaces and source-of-truth candidates",
+    )
     inventory_parser.add_argument("--repo", required=True)
 
-    interfaces_parser = subparsers.add_parser("interfaces", help="Extract live CLI flags, config keys, and referenced paths")
+    interfaces_parser = subparsers.add_parser(
+        "interfaces",
+        help="Extract live CLI flags, config keys, and referenced paths",
+    )
     interfaces_parser.add_argument("--repo", required=True)
 
     report_parser = subparsers.add_parser("report", help="Generate a documentation drift report")
@@ -189,9 +198,16 @@ def main() -> None:
 
     regression_parser = subparsers.add_parser("regression-check", help="Generate a lightweight regression check")
     regression_parser.add_argument("--repo", required=True)
-    regression_parser.add_argument("--kind", required=True, choices=["cli-flags", "config-schema", "referenced-paths", "private-infra"])
+    regression_parser.add_argument(
+        "--kind",
+        required=True,
+        choices=["cli-flags", "config-schema", "referenced-paths", "private-infra"],
+    )
 
-    sanitize_parser = subparsers.add_parser("sanitize-public-docs", help="Rewrite public docs to remove maintainer-specific infrastructure details")
+    sanitize_parser = subparsers.add_parser(
+        "sanitize-public-docs",
+        help="Rewrite public docs to remove maintainer-specific infrastructure details",
+    )
     sanitize_parser.add_argument("--repo", required=True)
     sanitize_parser.add_argument("--write", action="store_true", help="Apply the sanitized rewrites to disk")
 

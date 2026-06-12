@@ -102,7 +102,10 @@ def _peer_plugin_root(plugin_name: str) -> Path:
     return fallback
 
 DEFAULT_SCAN_ROOTS = [LEGACY_ROOT, PROJECTS_ROOT, RUNTIME_ROOT, RESEARCH_ROOT, SIDEPROJECTS_ROOT]
-TEXT_SUFFIXES = {".py", ".R", ".r", ".qmd", ".ipynb", ".md", ".txt", ".yaml", ".yml", ".json", ".toml", ".ini", ".cfg", ".sh"}
+TEXT_SUFFIXES = {
+    ".py", ".R", ".r", ".qmd", ".ipynb", ".md", ".txt", ".yaml", ".yml",
+    ".json", ".toml", ".ini", ".cfg", ".sh",
+}
 RUNTIME_NAME_RE = re.compile(r"(runtime|scratch|tmp|temp|cache|intermediate|work)", re.I)
 RESEARCH_NAME_RE = re.compile(r"(research|analysis|study|paper|clinical|medical|bio|health|uveal)", re.I)
 PATH_RE = re.compile(r"(?:(?:~|/Users/[^'\"\s]+)|(?:[A-Za-z]:\\[^'\"\s]+)|(?:\.\.?/[^'\"\s]+))")
@@ -203,7 +206,11 @@ def project_publish_denylist(repo_root: Path) -> tuple[list[str], str | None]:
 def iter_repo_files(repo_root: Path, suffixes: set[str] | None = None) -> list[Path]:
     files: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(repo_root):
-        dirnames[:] = [name for name in dirnames if not name.startswith(".") and name.lower() not in IGNORED_AUDIT_CHILD_DIRS]
+        dirnames[:] = [
+            name
+            for name in dirnames
+            if not name.startswith(".") and name.lower() not in IGNORED_AUDIT_CHILD_DIRS
+        ]
         current = Path(dirpath)
         for filename in filenames:
             path = current / filename
@@ -380,13 +387,20 @@ def validate_plugin(root: Path) -> dict[str, Any]:
             "passed": _marketplace_entry_resolves_to(registered_entry, marketplace_path, expected_plugin_root),
         },
         {"name": "marketplace-entry-metadata", "passed": _marketplace_entry_has_required_metadata(registered_entry)},
-        {"name": "plugin-root-is-source-or-home-root", "passed": plugin_root.resolve() == expected_plugin_root.resolve()},
+        {
+            "name": "plugin-root-is-source-or-home-root",
+            "passed": plugin_root.resolve() == expected_plugin_root.resolve(),
+        },
         {"name": "plugin-manifest-exists", "passed": manifest_path.exists()},
         {"name": "no-fake-urls", "passed": "example.com" not in json.dumps(manifest)},
         {"name": "top-level-skill", "passed": f"name: {PLUGIN_NAME}" in top_level_skill},
         {
             "name": "autonomous-readonly-flow",
-            "passed": "prefer `assess --repo <path>`" in top_level_skill.lower() and "run the full non-mutating assessment before pausing to discuss changes" in top_level_skill.lower(),
+            "passed": (
+                "prefer `assess --repo <path>`" in top_level_skill.lower()
+                and "run the full non-mutating assessment before pausing to discuss changes"
+                in top_level_skill.lower()
+            ),
         },
         {"name": "mention-docs", "passed": "@workspace-governor" in readme_text},
         {"name": "icon-exists", "passed": icon_path.exists()},
@@ -504,7 +518,11 @@ def child_dirs(root: Path) -> list[Path]:
         key=lambda p: p.name.lower(),
     )
 
-def suggested_destination(repo_name: str, profile: dict[str, Any], classification: dict[str, str] | None = None) -> Path | None:
+def suggested_destination(
+    repo_name: str,
+    profile: dict[str, Any],
+    classification: dict[str, str] | None = None,
+) -> Path | None:
     slug = canonical_project_name(repo_name)
     if classification:
         if classification["kind"] == "research":
@@ -553,7 +571,8 @@ def build_dry_run_questions(profile: dict[str, Any], destination: Path | None) -
     registry_review = profile["metadata"].get("registry_review") or {}
     if registry_review.get("exists") and not registry_review.get("supported", True):
         questions.append(
-            "Should analysis_registry.yaml be rewritten to the supported top-level metadata contract before relying on it?"
+            "Should analysis_registry.yaml be rewritten to the supported top-level metadata "
+            "contract before relying on it?"
         )
     if profile["profile_guess"] == "general":
         questions.append("Should this repo stay in place, or be moved into the managed workspace layout?")
@@ -640,7 +659,8 @@ def assess(args: argparse.Namespace) -> dict[str, Any]:
 
     dry_run_report = build_dry_run_plan(repo_root, profile, classifications)
 
-    audit_roots = [Path(root).expanduser().resolve() for root in (args.roots or [str(root) for root in DEFAULT_SCAN_ROOTS])]
+    default_roots = [str(root) for root in DEFAULT_SCAN_ROOTS]
+    audit_roots = [Path(root).expanduser().resolve() for root in (args.roots or default_roots)]
     audit_report = audit(
         argparse.Namespace(
             roots=[str(root) for root in audit_roots],
@@ -662,7 +682,11 @@ def assess(args: argparse.Namespace) -> dict[str, Any]:
         for record in audit_report["records"]
         if record.get("slug") == repo_slug
         or record.get("source") == str(repo_root)
-        or record.get("destination") in {dry_run_report.get("proposed_destination"), dry_run_report.get("proposed_code_root")}
+        or record.get("destination")
+        in {
+            dry_run_report.get("proposed_destination"),
+            dry_run_report.get("proposed_code_root"),
+        }
     ]
     workspace_plan = audit_report.get("plan", [])
     workspace_move_count = len(workspace_plan) if isinstance(workspace_plan, list) else 0
@@ -701,8 +725,12 @@ def assess(args: argparse.Namespace) -> dict[str, Any]:
             "dry_run_rewrite_candidate_count": dry_run_rewrite_count,
             "doc_contract_passed": doc_contract_passed,
             "publish_requires_doc_review": publish_requires_doc_review,
-            "publishable_candidate_count": len(publish_preview_report.get("publish_candidates", {}).get("publishable", [])),
-            "skipped_publish_candidate_count": len(publish_preview_report.get("publish_candidates", {}).get("skipped", [])),
+            "publishable_candidate_count": len(
+                publish_preview_report.get("publish_candidates", {}).get("publishable", [])
+            ),
+            "skipped_publish_candidate_count": len(
+                publish_preview_report.get("publish_candidates", {}).get("skipped", [])
+            ),
             "related_workspace_record_count": len(related_audit_records),
             "workspace_move_count": workspace_move_count,
             "apply_recommended": workspace_move_count > 0,
@@ -822,7 +850,10 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
                 "status": "review-required",
                 **report,
                 "doc_rewrite_result": rewrite_result,
-                "error": "Public docs were auto-rewritten. Review the changes, then rerun publish with --approve-doc-review.",
+                "error": (
+                    "Public docs were auto-rewritten. Review the changes, then rerun publish "
+                    "with --approve-doc-review."
+                ),
             }
             if args.output:
                 write_json(Path(args.output), payload)
@@ -892,42 +923,88 @@ def build_parser() -> argparse.ArgumentParser:
     assess_parser = subparsers.add_parser("assess", help="Run the full non-mutating assessment pass for one repo")
     assess_parser.add_argument("--repo", required=True, help="Path to the repository to assess")
     assess_parser.add_argument("--kind", help="Optional override: research, sideproject, or general")
-    assess_parser.add_argument("--classify", action="append", help="Explicit classification, e.g. project=sideproject or project=research")
-    assess_parser.add_argument("--roots", nargs="*", help="Roots to scan for workspace-wide planning context; defaults to canonical and legacy roots")
-    assess_parser.add_argument("--snapshot-id", default=format(datetime.now().date(), "%Y-%m-%d"), help="Snapshot identifier for the cloud publish folder")
+    assess_parser.add_argument(
+        "--classify",
+        action="append",
+        help="Explicit classification, e.g. project=sideproject or project=research",
+    )
+    assess_parser.add_argument(
+        "--roots",
+        nargs="*",
+        help="Roots to scan for workspace-wide planning context; defaults to canonical and legacy roots",
+    )
+    assess_parser.add_argument(
+        "--snapshot-id",
+        default=format(datetime.now().date(), "%Y-%m-%d"),
+        help="Snapshot identifier for the cloud publish folder",
+    )
     assess_parser.add_argument("--output", help="Write assessment JSON to this path")
 
-    dry_run_parser = subparsers.add_parser("dry-run", help="Inspect one repo and list the questions needed to migrate it safely")
+    dry_run_parser = subparsers.add_parser(
+        "dry-run",
+        help="Inspect one repo and list the questions needed to migrate it safely",
+    )
     dry_run_parser.add_argument("--repo", required=True, help="Path to the repository to inspect")
     dry_run_parser.add_argument("--kind", help="Optional override: research, sideproject, or general")
-    dry_run_parser.add_argument("--classify", action="append", help="Explicit classification, e.g. project=sideproject or project=research")
+    dry_run_parser.add_argument(
+        "--classify",
+        action="append",
+        help="Explicit classification, e.g. project=sideproject or project=research",
+    )
     dry_run_parser.add_argument("--output", help="Write dry-run JSON to this path")
 
     audit_parser = subparsers.add_parser("audit", help="Inventory roots and build a move plan")
     audit_parser.add_argument("--roots", nargs="*", help="Roots to scan; defaults to the canonical and legacy roots")
-    audit_parser.add_argument("--classify", action="append", help="Explicit classification, e.g. project=sideproject or project=research")
+    audit_parser.add_argument(
+        "--classify",
+        action="append",
+        help="Explicit classification, e.g. project=sideproject or project=research",
+    )
     audit_parser.add_argument("--output", help="Write audit JSON to this path")
 
     apply_parser = subparsers.add_parser("apply", help="Apply a move plan from an audit or assess JSON file")
-    apply_parser.add_argument("--audit", required=True, help="Audit or assess JSON produced by the audit or assess command")
+    apply_parser.add_argument(
+        "--audit",
+        required=True,
+        help="Audit or assess JSON produced by the audit or assess command",
+    )
     apply_parser.add_argument("--backup-root", help="Backup root directory")
     apply_parser.add_argument("--output", help="Write apply manifest JSON to this path")
 
     verify_parser = subparsers.add_parser("verify", help="Verify a move manifest")
     verify_parser.add_argument("--manifest", required=True, help="Apply manifest JSON produced by apply")
     verify_parser.add_argument("--deep", action="store_true", help="Use content hashes for verification")
-    verify_parser.add_argument("--test-command", nargs=argparse.REMAINDER, help="Optional command to run in each destination after verification metadata checks")
+    verify_parser.add_argument(
+        "--test-command",
+        nargs=argparse.REMAINDER,
+        help="Optional command to run in each destination after verification metadata checks",
+    )
     verify_parser.add_argument("--output", help="Write verification JSON to this path")
 
-    preview_parser = subparsers.add_parser("publish-preview", help="Preview publishable runtime artifacts and doc policy checks")
+    preview_parser = subparsers.add_parser(
+        "publish-preview",
+        help="Preview publishable runtime artifacts and doc policy checks",
+    )
     preview_parser.add_argument("--repo", required=True, help="Path to the repository to inspect")
-    preview_parser.add_argument("--snapshot-id", default=format(datetime.now().date(), "%Y-%m-%d"), help="Snapshot identifier for the cloud publish folder")
+    preview_parser.add_argument(
+        "--snapshot-id",
+        default=format(datetime.now().date(), "%Y-%m-%d"),
+        help="Snapshot identifier for the cloud publish folder",
+    )
     preview_parser.add_argument("--output", help="Write publish preview JSON to this path")
 
     publish_parser = subparsers.add_parser("publish", help="Publish runtime artifacts into a dated cloud snapshot")
     publish_parser.add_argument("--repo", required=True, help="Path to the repository to publish")
-    publish_parser.add_argument("--snapshot-id", default=format(datetime.now().date(), "%Y-%m-%d"), help="Snapshot identifier for the cloud publish folder")
-    publish_parser.add_argument("--approve-doc-review", action="store_true", help="Acknowledge review after any auto-rewritten public docs")
+    publish_parser.add_argument(
+        "--snapshot-id",
+        default=format(datetime.now().date(), "%Y-%m-%d"),
+        help="Snapshot identifier for the cloud publish folder",
+    )
+    publish_parser.add_argument(
+        "--approve-doc-review",
+        action="store_true",
+        help="Acknowledge review after any auto-rewritten public docs",
+    )
     publish_parser.add_argument("--output", help="Write publish JSON to this path")
 
     subparsers.add_parser("validate", help="Validate local plugin registration and assets")

@@ -280,8 +280,16 @@ def infer_project_profile(repo_root: Path, repo_name: str) -> dict[str, Any]:
     research_name_hit = bool(MEDICAL_NAME_RE.search(repo_name))
     sideproject_name_hit = bool(SIDEPROJECT_NAME_RE.search(repo_name))
 
-    research_score = (4 if research_name_hit else 0) + (2 * research_content_hits) + (8 if metadata["project_type"] == "research" else 0)
-    sideproject_score = (3 if sideproject_name_hit else 0) + (2 * sideproject_content_hits) + (8 if metadata["project_type"] == "sideproject" else 0)
+    research_score = (
+        (4 if research_name_hit else 0)
+        + (2 * research_content_hits)
+        + (8 if metadata["project_type"] == "research" else 0)
+    )
+    sideproject_score = (
+        (3 if sideproject_name_hit else 0)
+        + (2 * sideproject_content_hits)
+        + (8 if metadata["project_type"] == "sideproject" else 0)
+    )
 
     existing_cloud_side = SIDEPROJECTS_ROOT / repo_name
     existing_cloud_research = RESEARCH_ROOT / repo_name if (RESEARCH_ROOT / repo_name).exists() else None

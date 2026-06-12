@@ -238,8 +238,12 @@ def extract_interfaces(root: Path) -> dict[str, Any]:
         doc_path = root / path
         text = read_text(doc_path)
         candidates: list[tuple[str, int, int, bool]] = []
-        candidates.extend((match.group(1), match.start(1), match.end(1), True) for match in MARKDOWN_LINK_RE.finditer(text))
-        candidates.extend((match.group(0), match.start(0), match.end(0), False) for match in PATH_TOKEN_RE.finditer(text))
+        candidates.extend(
+            (match.group(1), match.start(1), match.end(1), True) for match in MARKDOWN_LINK_RE.finditer(text)
+        )
+        candidates.extend(
+            (match.group(0), match.start(0), match.end(0), False) for match in PATH_TOKEN_RE.finditer(text)
+        )
         seen_tokens: set[str] = set()
         for token, start, end, explicit_link in candidates:
             normalized = normalize_path_token(token)

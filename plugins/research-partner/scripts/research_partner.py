@@ -182,7 +182,13 @@ def inventory_repo(root: Path) -> dict[str, Any]:
             if path.suffix.lower() == ".ipynb":
                 notebooks.append(rel_path)
     text = read_text(project_doc) + "\n" + read_text(registry)
-    declared_paths = sorted({line.strip() for line in text.splitlines() if parse_declared_path(line) is not None or any(hint in line for hint in DECLARED_PATH_HINTS)})
+    declared_paths = sorted(
+        {
+            line.strip()
+            for line in text.splitlines()
+            if parse_declared_path(line) is not None or any(hint in line for hint in DECLARED_PATH_HINTS)
+        }
+    )
 
     findings = []
     for path in declared_paths:
@@ -238,8 +244,12 @@ def inventory_repo(root: Path) -> dict[str, Any]:
             "workspace_path_review": workspace_path_review,
         },
         "findings": findings,
-        "direct_evidence_vs_inference": "Inventory findings are grounded in the repo tree and declared project metadata.",
-        "required_tests_checks": ["Confirm that declared runtime and published-output paths match the actual environment."],
+        "direct_evidence_vs_inference": (
+            "Inventory findings are grounded in the repo tree and declared project metadata."
+        ),
+        "required_tests_checks": [
+            "Confirm that declared runtime and published-output paths match the actual environment.",
+        ],
         "recommended_actions": recommended_actions,
         "flow": DEFAULT_FLOW,
     }
@@ -275,7 +285,12 @@ def validate_plugin(root: Path) -> dict[str, Any]:
 
     registered_entry = marketplace_entry_by_name(marketplace, PLUGIN_NAME)
     checks.append({"name": "manifest-name", "passed": manifest.get("name") == PLUGIN_NAME})
-    checks.append({"name": "display-name", "passed": manifest.get("interface", {}).get("displayName") == PLUGIN_DISPLAY_NAME})
+    checks.append(
+        {
+            "name": "display-name",
+            "passed": manifest.get("interface", {}).get("displayName") == PLUGIN_DISPLAY_NAME,
+        }
+    )
     checks.append({"name": "skills-path", "passed": manifest.get("skills") == EXPECTED_SKILLS_PATH})
     checks.append({"name": "marketplace-registration", "passed": registered_entry is not None})
     checks.append(
@@ -284,15 +299,29 @@ def validate_plugin(root: Path) -> dict[str, Any]:
             "passed": marketplace_entry_resolves_to(registered_entry, marketplace_path, expected_plugin_root),
         }
     )
-    checks.append({"name": "marketplace-entry-metadata", "passed": marketplace_entry_has_required_metadata(registered_entry)})
-    checks.append({"name": "plugin-root-is-source-or-home-root", "passed": plugin_root.resolve() == expected_plugin_root.resolve()})
+    checks.append(
+        {
+            "name": "marketplace-entry-metadata",
+            "passed": marketplace_entry_has_required_metadata(registered_entry),
+        }
+    )
+    checks.append(
+        {
+            "name": "plugin-root-is-source-or-home-root",
+            "passed": plugin_root.resolve() == expected_plugin_root.resolve(),
+        }
+    )
     checks.append({"name": "plugin-manifest-exists", "passed": manifest_path.exists()})
     checks.append({"name": "no-fake-urls", "passed": "example.com" not in json.dumps(manifest)})
     checks.append({"name": "top-level-skill", "passed": f"name: {PLUGIN_NAME}" in top_level_skill})
     checks.append(
         {
             "name": "default-flow",
-            "passed": "review-preflight" in top_level_skill and "documentation-wizard" in top_level_skill and "review-synthesizer" in top_level_skill,
+            "passed": (
+                "review-preflight" in top_level_skill
+                and "documentation-wizard" in top_level_skill
+                and "review-synthesizer" in top_level_skill
+            ),
         }
     )
     checks.append({"name": "mention-docs", "passed": "@research-partner" in readme_text})
