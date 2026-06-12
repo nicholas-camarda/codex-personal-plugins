@@ -375,6 +375,7 @@ class PluginRegressionTests(unittest.TestCase):
 
         self.assertGreaterEqual(preview["changed_files"], 1)
         self.assertIn("output/result.csv", public_text)
+        self.assertNotIn("/Users/example/Library/CloudStorage/OneDrive-Personal", public_text)
         self.assertIn("/Users/example/ProjectsRuntime/project", agents_text)
 
     def test_workspace_governor_assess_smoke_on_research_fixture(self) -> None:
