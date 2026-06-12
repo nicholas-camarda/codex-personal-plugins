@@ -743,5 +743,31 @@ class PluginRegressionTests(unittest.TestCase):
         self.assertIn("summary", report)
 
 
+PLUGIN_EVAL_JS = Path(
+    "/Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js"
+)
+
+
+class PluginEvalRegressionTests(unittest.TestCase):
+    def test_plugin_eval_baseline_file_exists(self) -> None:
+        baseline_path = ROOT / "tests" / "plugin_eval_baseline.json"
+        self.assertTrue(baseline_path.exists(), "missing tests/plugin_eval_baseline.json")
+
+    def test_plugin_python_heuristics_match_baseline_or_improve(self) -> None:
+        from scripts.plugin_eval_regression import analyze_plugin_python
+
+        baseline = json.loads((ROOT / "tests" / "plugin_eval_baseline.json").read_text(encoding="utf-8"))
+        self.assertIn("plugins", baseline)
+        for plugin_name, expected in baseline["plugins"].items():
+            self.assertIn("max_complexity", expected, f"{plugin_name} baseline missing max_complexity")
+            self.assertIn("long_lines", expected, f"{plugin_name} baseline missing long_lines")
+            metrics = analyze_plugin_python(PLUGINS_ROOT / plugin_name / "scripts")
+            self.assertEqual(
+                metrics["long_lines"],
+                expected["long_lines"],
+                f"{plugin_name} long_lines regressed from baseline",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

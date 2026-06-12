@@ -1,0 +1,41 @@
+{
+  "plugins": {
+    "documentation-wizard": {
+      "score": null,
+      "max_complexity": 81,
+      "long_lines": 13,
+      "trigger_cost_tokens": 109,
+      "deferred_cost_tokens": 11843,
+      "warn_check_ids": [
+        "deferred_cost_tokens-budget-high",
+        "py-complexity-high",
+        "py-long-lines"
+      ]
+    },
+    "research-partner": {
+      "score": null,
+      "max_complexity": 72,
+      "long_lines": 38,
+      "trigger_cost_tokens": 356,
+      "deferred_cost_tokens": 12682,
+      "warn_check_ids": [
+        "deferred_cost_tokens-budget-high",
+        "py-complexity-high",
+        "py-long-lines",
+        "trigger_cost_tokens-budget-high"
+      ]
+    },
+    "workspace-governor": {
+      "score": null,
+      "max_complexity": 253,
+      "long_lines": 30,
+      "trigger_cost_tokens": 104,
+      "deferred_cost_tokens": 23779,
+      "warn_check_ids": [
+        "deferred_cost_tokens-budget-high",
+        "py-complexity-high",
+        "py-long-lines"
+      ]
+    }
+  }
+}
