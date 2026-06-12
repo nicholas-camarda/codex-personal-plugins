@@ -116,6 +116,12 @@ python -m coverage run -m unittest discover
 python -m coverage xml
 ```
 
+Generate per-plugin coverage artifacts for Plugin Eval:
+
+```bash
+python scripts/generate_plugin_coverage.py
+```
+
 Run the research-partner smoke review:
 
 ```bash

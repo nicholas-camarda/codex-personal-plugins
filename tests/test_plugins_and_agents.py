@@ -768,6 +768,14 @@ class PluginEvalRegressionTests(unittest.TestCase):
                 f"{plugin_name} long_lines regressed from baseline",
             )
 
+    def test_plugins_have_local_coverage_artifacts(self) -> None:
+        for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
+            coverage_path = PLUGINS_ROOT / plugin_name / "coverage.xml"
+            self.assertTrue(coverage_path.exists(), f"missing {coverage_path}")
+            text = coverage_path.read_text(encoding="utf-8")
+            self.assertIn("coverage", text)
+            self.assertIn("line-rate", text)
+
 
 if __name__ == "__main__":
     unittest.main()

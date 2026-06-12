@@ -4,6 +4,7 @@ __pycache__/
 .mypy_cache/
 .coverage
 coverage.xml
+plugins/*/coverage.xml
 htmlcov/
 node_modules/
 .DS_Store
