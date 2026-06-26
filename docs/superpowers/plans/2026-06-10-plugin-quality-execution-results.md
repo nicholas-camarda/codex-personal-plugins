@@ -10,9 +10,9 @@
 - `python plugins/research-partner/scripts/research_partner.py validate`
 - `python plugins/workspace-governor/scripts/workspace_governor.py validate`
 - `python plugins/research-partner/scripts/research_partner.py run --repo tests/fixtures/research_repo --output-dir /tmp/research-partner-run-smoke`
-- `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard --format markdown`
-- `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner --format markdown`
-- `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor --format markdown`
+- `node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown`
+- `node scripts/plugin-eval.js analyze plugins/research-partner --format markdown`
+- `node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown`
 
 ## Results
 

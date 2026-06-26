@@ -6,7 +6,7 @@
 
 **Architecture:** First remove documentation drift and add golden behavioral tests so refactors have a safety net. Then extract focused helper modules from the large single-file scripts while keeping the existing CLI entrypoint filenames intact. Finally reduce skill token cost by moving detailed guidance into references, add coverage artifacts, and rerun Plugin Eval.
 
-**Tech Stack:** Python 3 standard library, `unittest`, `coverage` if available, JSON fixture assertions, local Codex plugin manifests, Plugin Eval CLI via `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js`.
+**Tech Stack:** Python 3 standard library, `unittest`, `coverage` if available, JSON fixture assertions, local Codex plugin manifests, Plugin Eval CLI via `node scripts/plugin-eval.js`.
 
 ---
 
@@ -319,11 +319,11 @@ Add these methods inside `PluginRegressionTests` in `tests/test_plugins_and_agen
             public_path = repo_root / "README.md"
             agents_path = repo_root / "AGENTS.md"
             public_path.write_text(
-                "Artifacts live at /Users/example/Library/CloudStorage/OneDrive-Personal/Research/project/output/result.csv\n",
+                "Artifacts live at output/result.csv\n",
                 encoding="utf-8",
             )
             agents_path.write_text(
-                "runtime_home: /Users/example/ProjectsRuntime/project\n",
+                "runtime_home: the configured runtime output directory
                 encoding="utf-8",
             )
 
@@ -331,7 +331,7 @@ Add these methods inside `PluginRegressionTests` in `tests/test_plugins_and_agen
 
         self.assertGreaterEqual(preview["changed_files"], 1)
         self.assertIn("output/result.csv", public_path.read_text(encoding="utf-8"))
-        self.assertIn("/Users/example/ProjectsRuntime/project", agents_path.read_text(encoding="utf-8"))
+        self.assertIn("the configured runtime output directory agents_path.read_text(encoding="utf-8"))
 ```
 
 - [ ] **Step 2: Add research-partner golden tests**
@@ -1190,7 +1190,7 @@ Use this reference when documentation review requires more detail than the skill
 2. generated docs when generation is canonical
 3. maintained prose docs such as `README*` and `docs/`
 
-Public docs should remain portable. Maintainer-specific infrastructure such as `OneDrive`, `~/ProjectsRuntime`, and `/Users/...` belongs in `AGENTS.md` or clearly internal docs such as `.local.md`.
+Public docs should remain portable. Maintainer-specific infrastructure such as `OneDrive`, `the configured runtime output directory`, and `Users/...` belongs in `AGENTS.md` or clearly internal docs such as `.local.md`.
 
 ## Helper Commands
 
@@ -1238,10 +1238,10 @@ Use this reference for detailed workspace-governor behavior.
 
 ## Canonical Layout
 
-- source code: `~/Projects/<slug>`
-- runtime artifacts: `~/ProjectsRuntime/<slug>`
-- research cloud homes: `~/Library/CloudStorage/OneDrive-Personal/Research/<slug>`
-- side project cloud homes: `~/Library/CloudStorage/OneDrive-Personal/SideProjects/<slug>`
+- source code: `the local source checkout`
+- runtime artifacts: `the configured runtime output directory`
+- research cloud homes: `the configured synced project home`
+- side project cloud homes: `the configured synced project home`
 
 General software repos without strong managed-layout signals stay neutral rather than being forced into Research or SideProjects.
 
@@ -1354,9 +1354,9 @@ Expected: PASS.
 Run:
 
 ```bash
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/documentation-wizard-token-pass.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/research-partner-token-pass.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/workspace-governor-token-pass.md
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/documentation-wizard-token-pass.md
+node scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/research-partner-token-pass.md
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/workspace-governor-token-pass.md
 rg -n "Score:|token.*budget|description-trigger-weak" /tmp/documentation-wizard-token-pass.md /tmp/research-partner-token-pass.md /tmp/workspace-governor-token-pass.md
 ```
 
@@ -1457,9 +1457,9 @@ Then continue.
 Run:
 
 ```bash
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/documentation-wizard-coverage-pass.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/research-partner-coverage-pass.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/workspace-governor-coverage-pass.md
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/documentation-wizard-coverage-pass.md
+node scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/research-partner-coverage-pass.md
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/workspace-governor-coverage-pass.md
 rg -n "coverage-artifacts-unavailable|Score:" /tmp/documentation-wizard-coverage-pass.md /tmp/research-partner-coverage-pass.md /tmp/workspace-governor-coverage-pass.md
 ```
 
@@ -1494,9 +1494,9 @@ python plugins/documentation-wizard/scripts/documentation_wizard.py validate
 python plugins/research-partner/scripts/research_partner.py validate
 python plugins/workspace-governor/scripts/workspace_governor.py validate
 python plugins/research-partner/scripts/research_partner.py run --repo tests/fixtures/research_repo --output-dir /tmp/research-partner-quality-followup-smoke
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/documentation-wizard-quality-followup.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/research-partner-quality-followup.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/workspace-governor-quality-followup.md
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/documentation-wizard-quality-followup.md
+node scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/research-partner-quality-followup.md
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/workspace-governor-quality-followup.md
 ```
 
 Expected: all commands exit 0.
@@ -1596,9 +1596,9 @@ python plugins/documentation-wizard/scripts/documentation_wizard.py validate
 python plugins/research-partner/scripts/research_partner.py validate
 python plugins/workspace-governor/scripts/workspace_governor.py validate
 python plugins/research-partner/scripts/research_partner.py run --repo tests/fixtures/research_repo --output-dir /tmp/research-partner-quality-followup-smoke
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/research-partner --format markdown
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown
+node scripts/plugin-eval.js analyze plugins/research-partner --format markdown
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown
 python scripts/deploy_plugins.py install --source-root . --home ~
 python ~/.codex/plugins/documentation-wizard/scripts/documentation_wizard.py validate
 python ~/.codex/plugins/research-partner/scripts/research_partner.py validate

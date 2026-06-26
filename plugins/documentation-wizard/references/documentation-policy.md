@@ -8,7 +8,7 @@ Use this reference when documentation review requires more detail than the skill
 2. generated docs when generation is canonical
 3. maintained prose docs such as `README*` and `docs/`
 
-Public docs should remain portable. Maintainer-specific infrastructure such as `OneDrive`, `~/ProjectsRuntime`, and `/Users/...` belongs in `AGENTS.md` or clearly internal docs such as `.local.md`.
+Public docs should remain portable. Maintainer-specific infrastructure belongs in `AGENTS.md` or clearly internal docs such as `.local.md`.
 
 ## Helper Commands
 
@@ -25,7 +25,11 @@ Public docs should remain portable. Maintainer-specific infrastructure such as `
 
 The intended policy is:
 
-- public docs such as `README*` and publish-facing `docs/` should stay portable and should not expose maintainer-specific paths like `OneDrive`, `~/ProjectsRuntime`, or `/Users/...`
+- public docs such as `README*` and publish-facing `docs/` should stay portable and should not expose private infrastructure, including:
+  - Absolute `/Users/...` paths.
+  - Local `Workspaces` source, runtime, results, and archive paths.
+  - OneDrive `Project Vault` record paths.
+  - Legacy local or synced roots such as `Projects`, `ProjectsRuntime`, `Research`, and `SideProjects`.
 - private operational details should live in `AGENTS.md` or clearly internal docs such as `.local.md`
 - `sanitize-public-docs` rewrites the public side only; it does not touch `AGENTS.md`
 

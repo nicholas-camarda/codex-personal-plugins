@@ -6,7 +6,7 @@ from typing import Any
 from . import _host
 from .planning_classify import classify_candidate as classify_candidate
 from .publish_deny import GLOBAL_PUBLISH_DENYLIST
-from .roots import PROJECTS_ROOT
+from .roots import WORKSPACES_ROOT
 
 
 def build_dry_run_plan(
@@ -22,7 +22,7 @@ def build_dry_run_plan(
     publish_root_name, publish_root_source = wg.configured_publish_root_name(repo_root)
     denylist_overrides, denylist_source = wg.project_publish_denylist(repo_root)
     doc_contract = wg.ensure_dual_doc_contract(repo_root)
-    doc_contract_required = profile["profile_guess"] in {"research", "sideproject"}
+    doc_contract_required = profile["profile_guess"] != "general"
     if not doc_contract_required:
         doc_contract = dict(doc_contract)
         doc_contract["required"] = False
@@ -45,9 +45,11 @@ def build_dry_run_plan(
         "metadata": profile["metadata"],
         "existing_footprints": profile["existing_footprints"],
         "proposed_destination": str(destination) if destination else None,
-        "proposed_code_root": str(PROJECTS_ROOT / wg.normalized_project_slug(repo_root)),
+        "proposed_code_root": str(WORKSPACES_ROOT / wg.normalized_project_slug(repo_root) / "source")
+        if destination
+        else None,
         "proposed_runtime_root": str(runtime_home),
-        "proposed_cloud_home": str(cloud_home),
+        "proposed_cloud_home": str(cloud_home) if cloud_home else None,
         "publish_root_name": publish_root_name,
         "publish_root_source": publish_root_source,
         "runtime_root_source": runtime_source,

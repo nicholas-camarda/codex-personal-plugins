@@ -2,7 +2,7 @@
 
 Personal Codex plugins for documentation review, research-analysis review, and workspace organization.
 
-This repository is the source of truth. Installed copies under `~/.codex/plugins/<plugin-name>` are deploy targets generated from this repo.
+This repository is the source of truth for personally authored Codex plugins. Installed copies under `~/.codex/plugins/<plugin-name>` are deploy targets generated from this repo.
 
 ## Plugins
 
@@ -135,9 +135,9 @@ python plugins/research-partner/scripts/research_partner.py run \
 Run Plugin Eval against each plugin:
 
 ```bash
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/research-partner --format markdown
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown
+node scripts/plugin-eval.js analyze plugins/research-partner --format markdown
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown
 ```
 
 ## Development Notes

@@ -27,12 +27,21 @@ def parse_metadata_text(repo_root: Path) -> dict[str, Any]:
     if cloud_home_value:
         signals.append(f"{cloud_home_source}.cloud_home")
 
-    if project_type is None and "SideProjects/" in combined:
-        project_type = "sideproject"
-        signals.append("metadata.sideprojects-path")
-    if project_type is None and "Research/" in combined:
+    if project_type is None and "Project Vault/Research/" in combined:
         project_type = "research"
-        signals.append("metadata.research-path")
+        signals.append("metadata.project-vault-research-path")
+    if project_type is None and "Project Vault/Personal Projects/" in combined:
+        project_type = "personal_project"
+        signals.append("metadata.project-vault-personal-projects-path")
+    if project_type is None and "Project Vault/Product and Hardware/" in combined:
+        project_type = "product_hardware"
+        signals.append("metadata.project-vault-product-hardware-path")
+    if project_type is None and "SideProjects/" in combined:
+        project_type = "legacy_sideproject"
+        signals.append("metadata.legacy-sideprojects-path")
+    if project_type is None and "Research/" in combined:
+        project_type = "legacy_research"
+        signals.append("metadata.legacy-research-path")
 
     return {
         "agents_path": str(agents_path) if agents_path.exists() else None,

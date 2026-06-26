@@ -14,7 +14,10 @@ def profile_questions(profile: dict[str, Any]) -> list[str]:
     if profile["profile_guess"] == "general":
         questions.append("Should this repo stay in place, or be moved into the managed workspace layout?")
     elif profile["profile_guess"] == "unknown":
-        questions.append("Should this repo be treated as Research, SideProjects, or as a general software repo?")
+        questions.append(
+            "Should this repo be classified under Research, Clinical and Residency, Personal Projects, "
+            "Product and Hardware, Life Admin, Archive, or as unmanaged?"
+        )
     if profile["has_legacy_paths"]:
         questions.append("Are legacy Desktop/coding paths safe to rewrite after migration?")
     return questions

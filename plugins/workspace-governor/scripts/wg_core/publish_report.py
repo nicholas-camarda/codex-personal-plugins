@@ -14,6 +14,10 @@ def build_publish_report(repo_root: Path, snapshot_id: str) -> dict[str, Any]:
     profile = infer_project_profile(repo_root, repo_root.name)
     runtime_root, runtime_source = wg.configured_runtime_home(repo_root)
     cloud_home, cloud_source = wg.configured_cloud_home(repo_root, profile["profile_guess"])
+    if cloud_home is None:
+        raise ValueError(
+            "An unmanaged repository requires an explicit cloud_home before it can publish durable records."
+        )
     publish_root_name, publish_root_source = wg.configured_publish_root_name(repo_root)
     publish_layout, publish_layout_source = wg.configured_publish_layout(repo_root)
     publish_denylist, denylist_source = wg.project_publish_denylist(repo_root)
@@ -21,7 +25,7 @@ def build_publish_report(repo_root: Path, snapshot_id: str) -> dict[str, Any]:
     snapshot_dir = wg.publish_snapshot_dir(cloud_home, publish_root_name, snapshot_id)
     doc_contract = wg.ensure_dual_doc_contract(repo_root)
     doc_policy = wg.doc_policy_report(repo_root)
-    doc_contract_required = profile["profile_guess"] in {"research", "sideproject"}
+    doc_contract_required = profile["profile_guess"] != "general"
     if not doc_contract_required:
         doc_contract = dict(doc_contract)
         doc_contract["required"] = False

@@ -196,7 +196,7 @@ def main() -> None:
 
     install_parser = subparsers.add_parser(
         "install",
-        help="Refresh ~/.agents/plugins/marketplace.json from the single source tree in ~/.codex/plugins",
+        help="install plugins from the source repository and refresh marketplace metadata in ~/.codex/plugins",
     )
     install_parser.add_argument("--source-root", default=str(Path(__file__).resolve().parents[1]))
     install_parser.add_argument("--home", default=str(Path.home()))

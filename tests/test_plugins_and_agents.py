@@ -54,10 +54,69 @@ DEPLOY_PLUGINS = load_module(
     "deploy_plugins_script",
     "scripts/deploy_plugins.py",
 )
+from rp_core import workspace_roots as RESEARCH_PARTNER_ROOTS
+from wg_core import roots as WORKSPACE_GOVERNOR_ROOTS
+from wg_core.destination_questions_profile import profile_questions
+
 FIXTURES_ROOT = ROOT / "tests" / "fixtures"
 
 
 class PluginRegressionTests(unittest.TestCase):
+    def test_plugins_default_to_workspaces_and_project_vault_contract(self) -> None:
+        self.assertEqual(WORKSPACE_GOVERNOR_ROOTS.WORKSPACES_ROOT, Path.home() / "Workspaces")
+        self.assertEqual(
+            WORKSPACE_GOVERNOR_ROOTS.PROJECT_VAULT_ROOT,
+            WORKSPACE_GOVERNOR_ROOTS.ONEDRIVE_ROOT / "Project Vault",
+        )
+        self.assertIn(WORKSPACE_GOVERNOR_ROOTS.WORKSPACES_ROOT, WORKSPACE_GOVERNOR_ROOTS.DEFAULT_SCAN_ROOTS)
+        self.assertIn(WORKSPACE_GOVERNOR_ROOTS.PROJECT_VAULT_ROOT, WORKSPACE_GOVERNOR_ROOTS.DEFAULT_SCAN_ROOTS)
+        self.assertNotIn(WORKSPACE_GOVERNOR_ROOTS.RESEARCH_ROOT, WORKSPACE_GOVERNOR_ROOTS.DEFAULT_SCAN_ROOTS)
+        self.assertNotIn(WORKSPACE_GOVERNOR_ROOTS.SIDEPROJECTS_ROOT, WORKSPACE_GOVERNOR_ROOTS.DEFAULT_SCAN_ROOTS)
+        self.assertEqual(
+            WORKSPACE_GOVERNOR_ROOTS.DEFAULT_BACKUP_ROOT,
+            WORKSPACE_GOVERNOR_ROOTS.WORKSPACES_ROOT / "_system" / "workspace-governor" / "backups",
+        )
+
+        self.assertIn(RESEARCH_PARTNER_ROOTS.WORKSPACES_ROOT, RESEARCH_PARTNER_ROOTS.CANONICAL_ROOTS)
+        self.assertIn(RESEARCH_PARTNER_ROOTS.PROJECT_VAULT_ROOT, RESEARCH_PARTNER_ROOTS.CANONICAL_ROOTS)
+        self.assertNotIn(RESEARCH_PARTNER_ROOTS.RESEARCH_ROOT, RESEARCH_PARTNER_ROOTS.CANONICAL_ROOTS)
+        self.assertNotIn(RESEARCH_PARTNER_ROOTS.SIDEPROJECTS_ROOT, RESEARCH_PARTNER_ROOTS.CANONICAL_ROOTS)
+
+        self.assertEqual(
+            WORKSPACE_GOVERNOR.suggested_destination(
+                "research-fixture", {"profile_guess": "research"}
+            ),
+            WORKSPACE_GOVERNOR_ROOTS.WORKSPACES_ROOT / "research-fixture" / "source",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir) / "research-fixture"
+            repo_root.mkdir()
+            self.assertEqual(
+                WORKSPACE_GOVERNOR.default_cloud_home(repo_root, "research"),
+                WORKSPACE_GOVERNOR_ROOTS.PROJECT_VAULT_ROOT / "Research" / "research-fixture",
+            )
+            self.assertEqual(
+                WORKSPACE_GOVERNOR.default_cloud_home(repo_root, "personal_project"),
+                WORKSPACE_GOVERNOR_ROOTS.PROJECT_VAULT_ROOT
+                / "Personal Projects"
+                / "research-fixture",
+            )
+            self.assertIsNone(WORKSPACE_GOVERNOR.default_cloud_home(repo_root, "general"))
+
+    def test_workspace_questions_use_project_vault_categories_not_old_cloud_roots(self) -> None:
+        questions = profile_questions(
+            {
+                "metadata": {"registry_review": {"exists": False}},
+                "profile_guess": "unknown",
+                "has_legacy_paths": False,
+            }
+        )
+
+        self.assertEqual(
+            questions,
+            ["Should this repo be classified under Research, Clinical and Residency, Personal Projects, Product and Hardware, Life Admin, Archive, or as unmanaged?"],
+        )
+
     def stage_home_workspace(self, home_root: Path) -> Path:
         source_root = home_root / "source" / "codex-personal-plugins"
         source_root.mkdir(parents=True, exist_ok=True)
@@ -379,7 +438,9 @@ class PluginRegressionTests(unittest.TestCase):
             public_path = repo_root / "README.md"
             agents_path = repo_root / "AGENTS.md"
             public_path.write_text(
-                "Artifacts live at /Users/example/Library/CloudStorage/OneDrive-Personal/Research/project/output/result.csv\n",
+                "Artifacts live at /Users/example/Library/CloudStorage/OneDrive-Personal/Research/project/output/result.csv\n"
+                "Artifacts live at /Users/example/Library/CloudStorage/OneDrive-Personal/Project Vault/Research/project/results/result.csv\n"
+                "Source lives at /Users/example/Workspaces/project/source\n",
                 encoding="utf-8",
             )
             agents_path.write_text(
@@ -393,7 +454,9 @@ class PluginRegressionTests(unittest.TestCase):
 
         self.assertGreaterEqual(preview["changed_files"], 1)
         self.assertIn("output/result.csv", public_text)
+        self.assertIn("results/result.csv", public_text)
         self.assertNotIn("/Users/example/Library/CloudStorage/OneDrive-Personal", public_text)
+        self.assertNotIn("/Users/example/Workspaces", public_text)
         self.assertIn("/Users/example/ProjectsRuntime/project", agents_text)
 
     def test_workspace_governor_assess_smoke_on_research_fixture(self) -> None:
@@ -743,9 +806,21 @@ class PluginRegressionTests(unittest.TestCase):
         self.assertIn("summary", report)
 
 
-PLUGIN_EVAL_JS = Path(
-    "/Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js"
-)
+_PLUGIN_EVAL_CANDIDATES = [
+    Path.home() / ".codex/plugins/cache/openai-curated/plugin-eval",
+    Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "plugins/cache/openai-curated/plugin-eval",
+]
+PLUGIN_EVAL_JS: Path | None = None
+for _candidate in _PLUGIN_EVAL_CANDIDATES:
+    if _candidate.is_dir():
+        _matches = sorted(_candidate.glob("*/scripts/plugin-eval.js"))
+        if _matches:
+            PLUGIN_EVAL_JS = _matches[0]
+            break
+if PLUGIN_EVAL_JS is None:
+    PLUGIN_EVAL_JS = Path(
+        "~/.codex/plugins/cache/openai-curated/plugin-eval/*/scripts/plugin-eval.js"
+    ).expanduser()
 
 
 class PluginEvalRegressionTests(unittest.TestCase):

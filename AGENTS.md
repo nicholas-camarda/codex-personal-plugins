@@ -3,6 +3,7 @@
 ## Source of truth
 
 This repository is the source of truth for personally authored Codex plugins.
+Its canonical source path is the repository root.
 Do not edit installed copies under `~/.codex/plugins/<plugin-name>` except through the deploy script.
 
 ## Layout

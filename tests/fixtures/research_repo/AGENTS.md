@@ -1,6 +1,12 @@
 project_slug: research-fixture
 project_type: research
 domain: oncology
+workspace_home: /Users/example/Workspaces/research-fixture
+source_home: /Users/example/Workspaces/research-fixture/source
+runtime_home: /Users/example/Workspaces/research-fixture/runtime
+results_home: /Users/example/Workspaces/research-fixture/results
+cloud_home: /Users/example/Library/CloudStorage/OneDrive-Personal/Project Vault/Research/research-fixture
 publish_root_name: Analysis
+publish_layout: split-data-flat-analysis-v1
 
 Private path topology belongs here rather than in the public README.

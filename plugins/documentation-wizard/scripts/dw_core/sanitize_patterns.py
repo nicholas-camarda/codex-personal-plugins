@@ -12,6 +12,17 @@ class InfraPattern:
 
 PRIVATE_INFRA_PATTERNS = [
     InfraPattern(
+        re.compile(r"(?:~|/Users/[^/\s`]+)/(?:Workspaces)(?:/[^\s`]+)?"),
+        "the local workspace",
+    ),
+    InfraPattern(
+        re.compile(
+            r"(?:~|/Users/[^/\s`]+)/(?:Library/CloudStorage/OneDrive(?:-Personal| - Personal)?)/"
+            r"(?:Project Vault)(?:/[^\s`]+)?"
+        ),
+        "the configured project record home",
+    ),
+    InfraPattern(
         re.compile(r"(?:~|/Users/[^/\s`]+)/(?:Library/CloudStorage/OneDrive(?:-Personal| - Personal)?)/[^\s`]+"),
         "the configured synced project home",
     ),

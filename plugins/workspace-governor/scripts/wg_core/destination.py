@@ -6,7 +6,16 @@ from typing import Any
 from .destination_questions import build_dry_run_questions
 from .destination_rewrite import rewrite_candidates
 from .paths import IGNORED_AUDIT_CHILD_DIRS, canonical_project_name
-from .roots import LEGACY_ROOT, PROJECTS_ROOT, RESEARCH_ROOT, RUNTIME_ROOT, SIDEPROJECTS_ROOT
+from .roots import (
+    LEGACY_ROOT,
+    PROJECT_VAULT_ROOT,
+    PROJECTS_ROOT,
+    RESEARCH_ROOT,
+    RESIDENCY_ROOT,
+    RUNTIME_ROOT,
+    SIDEPROJECTS_ROOT,
+    WORKSPACES_ROOT,
+)
 
 
 def immediate_root_label(path: Path) -> str:
@@ -17,6 +26,9 @@ def immediate_root_label(path: Path) -> str:
         ("projects", PROJECTS_ROOT),
         ("research", RESEARCH_ROOT),
         ("sideprojects", SIDEPROJECTS_ROOT),
+        ("workspace", WORKSPACES_ROOT),
+        ("project-vault", PROJECT_VAULT_ROOT),
+        ("residency", RESIDENCY_ROOT),
     ]
     for label, root in labeled_roots:
         try:
@@ -47,16 +59,10 @@ def suggested_destination(
 ) -> Path | None:
     slug = canonical_project_name(repo_name)
     if classification:
-        if classification["kind"] == "research":
-            return RESEARCH_ROOT / slug
-        return SIDEPROJECTS_ROOT / slug
+        return WORKSPACES_ROOT / slug / "source"
     if profile["profile_guess"] == "general":
         return None
-    if profile["profile_guess"] == "research":
-        return RESEARCH_ROOT / slug
-    if profile["profile_guess"] == "sideproject":
-        return SIDEPROJECTS_ROOT / slug
-    return None
+    return WORKSPACES_ROOT / slug / "source"
 
 
 __all__ = [

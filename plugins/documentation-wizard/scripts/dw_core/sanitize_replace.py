@@ -38,6 +38,8 @@ def portable_suffix_after(path_text: str, marker: str, marker_fallback: str) -> 
 
 def portable_public_replacement(path_text: str, fallback: str) -> str:
     for marker, marker_fallback in [
+        ("Workspaces", "the local workspace"),
+        ("Project Vault", "the configured project record home"),
         ("ProjectsRuntime", "the configured runtime output directory"),
         ("Projects", "the local source checkout"),
         ("SideProjects", "the configured synced project home"),

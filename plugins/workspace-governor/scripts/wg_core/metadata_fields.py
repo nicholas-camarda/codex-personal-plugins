@@ -41,6 +41,15 @@ def project_type_from_text(registry_text: str, agents_text: str) -> tuple[str | 
     if project_type is None:
         return None, None
     normalized = project_type.lower()
-    if normalized not in {"research", "sideproject", "general"}:
+    if normalized not in {
+        "research",
+        "sideproject",
+        "clinical_residency",
+        "personal_project",
+        "product_hardware",
+        "life_admin",
+        "archive",
+        "general",
+    }:
         return None, None
     return normalized, source

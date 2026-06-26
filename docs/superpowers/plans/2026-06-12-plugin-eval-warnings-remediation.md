@@ -6,7 +6,7 @@
 
 **Architecture:** Plugin Eval uses static heuristics, not real cyclomatic complexity. Python “complexity” is `1 + count(if|elif|for|while|except|and|or)` per file, with the max across all plugin Python files compared to threshold `18`. Long-line warnings clear only when **zero** lines exceed 120 characters. Coverage scoring looks for `coverage.xml` **inside each plugin directory**. Research-partner trigger cost is dominated by nine implicit skill descriptions; lane skills move to `allow_implicit_invocation: false` via `agents/openai.yaml`. Deferred token cost counts nearly all plugin text (scripts, README, references, tests, assets); meaningful reduction requires smaller/shorter deferred files, not just moving code between Python modules.
 
-**Tech Stack:** Python 3 standard library, `unittest`, `coverage`, JSON Plugin Eval output, `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js`.
+**Tech Stack:** Python 3 standard library, `unittest`, `coverage`, JSON Plugin Eval output, `node scripts/plugin-eval.js`.
 
 **Branch:** Continue from `plugin-efficiency-quality-followup` (worktree at `~/.config/superpowers/worktrees/codex-personal-plugins/plugin-efficiency-quality-followup`).
 
@@ -102,7 +102,7 @@ Add to `tests/test_plugins_and_agents.py`:
 
 ```python
 PLUGIN_EVAL_JS = Path(
-    "/Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js"
+    "scripts/plugin-eval.js"
 )
 
 class PluginEvalRegressionTests(unittest.TestCase):
@@ -223,7 +223,7 @@ sys.path.insert(0, "scripts")
 from plugin_eval_regression import analyze_plugin_python, run_plugin_eval_json
 
 ROOT = Path(".")
-PLUGIN_EVAL = Path("/Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js")
+PLUGIN_EVAL = Path("scripts/plugin-eval.js")
 plugins = {}
 for name in ["documentation-wizard", "research-partner", "workspace-governor"]:
     scripts = analyze_plugin_python(ROOT / "plugins" / name / "scripts")
@@ -369,7 +369,7 @@ python scripts/generate_plugin_coverage.py
 ```bash
 python scripts/generate_plugin_coverage.py
 python -m unittest tests.test_plugins_and_agents.PluginEvalRegressionTests.test_plugins_have_local_coverage_artifacts -v
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/documentation-wizard --format json | python3 -c "import json,sys; d=json.load(sys.stdin); print([c['id'] for c in d['checks'] if 'coverage' in c['id']])"
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format json | python3 -c "import json,sys; d=json.load(sys.stdin); print([c['id'] for c in d['checks'] if 'coverage' in c['id']])"
 ```
 
 Expected: test PASS; Plugin Eval no longer emits `coverage-artifacts-unavailable` when run from repo root with artifacts present.
@@ -442,7 +442,7 @@ Priority files (highest counts): `rp_core/lanes.py`, `workspace_governor.py`, `d
 
 ```bash
 python -m unittest tests.test_plugins_and_agents.PluginEvalRegressionTests.test_plugin_python_has_no_lines_over_120_chars -v
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/research-partner --format json | python3 -c "import json,sys; d=json.load(sys.stdin); print('py-long-lines' in {c['id'] for c in d['checks']})"
+node scripts/plugin-eval.js analyze plugins/research-partner --format json | python3 -c "import json,sys; d=json.load(sys.stdin); print('py-long-lines' in {c['id'] for c in d['checks']})"
 ```
 
 Expected: test PASS; `py-long-lines` absent from all three plugins.
@@ -863,9 +863,9 @@ python plugins/documentation-wizard/scripts/documentation_wizard.py validate
 python plugins/research-partner/scripts/research_partner.py validate
 python plugins/workspace-governor/scripts/workspace_governor.py validate
 python plugins/research-partner/scripts/research_partner.py run --repo tests/fixtures/research_repo --output-dir /tmp/rp-eval-remediation-smoke
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/dw-eval-remediation.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/rp-eval-remediation.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/wg-eval-remediation.md
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/dw-eval-remediation.md
+node scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/rp-eval-remediation.md
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/wg-eval-remediation.md
 if rg -n "interface-missing-websiteURL|interface-missing-privacyPolicyURL|interface-missing-termsOfServiceURL|description-trigger-weak" /tmp/dw-eval-remediation.md /tmp/rp-eval-remediation.md /tmp/wg-eval-remediation.md; then exit 1; fi
 rg -n "Score:|py-complexity-high|py-long-lines|trigger_cost_tokens-budget-high|coverage-artifacts-unavailable|deferred_cost_tokens-budget-high" /tmp/dw-eval-remediation.md /tmp/rp-eval-remediation.md /tmp/wg-eval-remediation.md
 python scripts/deploy_plugins.py install --source-root . --home ~
@@ -898,9 +898,9 @@ python scripts/generate_plugin_coverage.py
 # Plugin Eval per plugin must NOT warn on:
 # py-complexity-high, py-long-lines, coverage-artifacts-unavailable
 # research-partner must NOT warn on trigger_cost_tokens-budget-high
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/documentation-wizard --format json
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/research-partner --format json
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze plugins/workspace-governor --format json
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format json
+node scripts/plugin-eval.js analyze plugins/research-partner --format json
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format json
 ```
 
 Deferred tokens:

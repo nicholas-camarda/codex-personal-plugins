@@ -6,7 +6,7 @@
 
 **Architecture:** Move authored plugin source into a dedicated git-backed Codex plugin source repo that uses the documented repo marketplace layout: `$REPO_ROOT/.agents/plugins/marketplace.json` plus plugins under `$REPO_ROOT/plugins/`. Keep `~/.codex/plugins` as the personal install/cache location, not the source of truth. Add a first-class `research-partner run` command that produces preflight, lane outputs, and a final bundle from actual local functions and sibling plugin CLIs. Fix plugin metadata and skill trigger text without adding compatibility hacks or temporary rescue paths.
 
-**Tech Stack:** Python 3 standard library, `unittest`, JSON CLI payloads, local Codex plugin manifests, Plugin Eval CLI via `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js`.
+**Tech Stack:** Python 3 standard library, `unittest`, JSON CLI payloads, local Codex plugin manifests, Plugin Eval CLI via `node scripts/plugin-eval.js`.
 
 ---
 
@@ -24,11 +24,11 @@ Do not split the work into unrelated rewrites. Keep changes small, tested, and d
 
 Use the documented Codex repo marketplace layout for development:
 
-- Source repo: `/Users/ncamarda/Projects/codex-personal-plugins`
+- Source repo: `the local source checkout`
 - Git remote: `https://github.com/nicholas-camarda/codex-personal-plugins.git`
-- Repo marketplace: `/Users/ncamarda/Projects/codex-personal-plugins/.agents/plugins/marketplace.json`
-- Authored plugins: `/Users/ncamarda/Projects/codex-personal-plugins/plugins/<plugin-name>/`
-- Personal installed plugins: `/Users/ncamarda/.codex/plugins/<plugin-name>/`
+- Repo marketplace: `plugins/marketplace.json`
+- Authored plugins: `plugins/<plugin-name>/`
+- Personal installed plugins: `plugins/<plugin-name>/`
 
 Rationale:
 
@@ -38,19 +38,19 @@ Rationale:
 
 Resolved decisions:
 
-- Use `/Users/ncamarda/Projects/codex-personal-plugins` as the canonical local source repo.
+- Use `the local source checkout` as the canonical local source repo.
 - Use `https://github.com/nicholas-camarda/codex-personal-plugins.git` as the canonical remote URL.
 - Use repo-specific manifest URLs that point to `https://github.com/nicholas-camarda/codex-personal-plugins`.
 - Implement deterministic local `research-partner` lane execution first. Do not add subagent-backed lane orchestration in this pass.
-- Treat installed personal plugin copies under `/Users/ncamarda/.codex/plugins/<plugin-name>` as generated deploy targets once the source repo is established. The deploy script may overwrite `/Users/ncamarda/.codex/plugins/documentation-wizard`, `/Users/ncamarda/.codex/plugins/research-partner`, and `/Users/ncamarda/.codex/plugins/workspace-governor` from the git-backed source repo.
+- Treat installed personal plugin copies under `plugins/<plugin-name>` as generated deploy targets once the source repo is established. The deploy script may overwrite `plugins/documentation-wizard`, `plugins/research-partner`, and `plugins/workspace-governor` from the git-backed source repo.
 
-After Task 0, all plan paths are relative to `/Users/ncamarda/Projects/codex-personal-plugins` unless an absolute path is shown.
+After Task 0, all plan paths are relative to `the local source checkout` unless an absolute path is shown.
 
 ## File Structure
 
 Create:
 
-- `/Users/ncamarda/Projects/codex-personal-plugins/`
+- `the local source checkout`
   - Git-backed source repo and Codex project root.
 
 - `.agents/plugins/marketplace.json`
@@ -105,7 +105,7 @@ Do not create new frameworks, dependencies, plugin manifests, or fallback paths.
 ### Task 0: Create The OpenAI/Codex Source Repo Layout
 
 **Files:**
-- Create: `/Users/ncamarda/Projects/codex-personal-plugins/`
+- Create: `the local source checkout`
 - Create: `.gitignore`
 - Create: `AGENTS.md`
 - Create: `.agents/plugins/marketplace.json`
@@ -122,7 +122,7 @@ Do not create new frameworks, dependencies, plugin manifests, or fallback paths.
 Run:
 
 ```bash
-mkdir -p /Users/ncamarda/Projects/codex-personal-plugins/plugins
+mkdir -p the local source checkout
 ```
 
 Expected: directory exists.
@@ -132,20 +132,20 @@ Expected: directory exists.
 Run:
 
 ```bash
-rsync -a --delete /Users/ncamarda/.codex/plugins/documentation-wizard/ /Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard/
-rsync -a --delete /Users/ncamarda/.codex/plugins/research-partner/ /Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/
-rsync -a --delete /Users/ncamarda/.codex/plugins/workspace-governor/ /Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor/
-rsync -a /Users/ncamarda/.codex/plugins/scripts/ /Users/ncamarda/Projects/codex-personal-plugins/scripts/
-rsync -a /Users/ncamarda/.codex/plugins/tests/ /Users/ncamarda/Projects/codex-personal-plugins/tests/
-rsync -a /Users/ncamarda/.codex/plugins/docs/ /Users/ncamarda/Projects/codex-personal-plugins/docs/
-cp /Users/ncamarda/.codex/plugins/three-plugin-assessment.md /Users/ncamarda/Projects/codex-personal-plugins/three-plugin-assessment.md
+rsync -a --delete plugins/documentation-wizard/ plugins/documentation-wizard/
+rsync -a --delete plugins/research-partner/ plugins/research-partner/
+rsync -a --delete plugins/workspace-governor/ plugins/workspace-governor/
+rsync -a plugins/scripts/ the local source checkout
+rsync -a plugins/tests/ the local source checkout
+rsync -a plugins/docs/ the local source checkout
+cp plugins/three-plugin-assessment.md three-plugin-assessment.md
 ```
 
-Expected: only authored plugin source, shared tests, shared scripts, docs, and the assessment file are copied. Do not copy `/Users/ncamarda/.codex/plugins/cache`.
+Expected: only authored plugin source, shared tests, shared scripts, docs, and the assessment file are copied. Do not copy `plugins/cache`.
 
 - [ ] **Step 3: Create `.gitignore`**
 
-Create `/Users/ncamarda/Projects/codex-personal-plugins/.gitignore`:
+Create `the local source checkout`:
 
 ```gitignore
 __pycache__/
@@ -169,7 +169,7 @@ node_modules/
 
 - [ ] **Step 4: Create repo-local `AGENTS.md`**
 
-Create `/Users/ncamarda/Projects/codex-personal-plugins/AGENTS.md`:
+Create `AGENTS.md`:
 
 ```markdown
 # Codex Personal Plugins
@@ -199,7 +199,7 @@ Do not edit installed copies under `~/.codex/plugins/<plugin-name>` except throu
 
 - [ ] **Step 5: Create repo marketplace**
 
-Create `/Users/ncamarda/Projects/codex-personal-plugins/.agents/plugins/marketplace.json`:
+Create `plugins/marketplace.json`:
 
 ```json
 {
@@ -253,7 +253,7 @@ Create `/Users/ncamarda/Projects/codex-personal-plugins/.agents/plugins/marketpl
 Run:
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 git init
 git remote add origin https://github.com/nicholas-camarda/codex-personal-plugins.git
 git status --short
@@ -266,7 +266,7 @@ Expected: `git status --short` shows only source repo files, not `cache/` or cur
 Run:
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 python -m unittest tests/test_plugins_and_agents.py
 ```
 
@@ -437,7 +437,7 @@ path_builder=lambda plugin: f"./.codex/plugins/{plugin['name']}",
 Run:
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 python -m unittest tests/test_plugins_and_agents.py
 ```
 
@@ -446,7 +446,7 @@ Expected: existing tests pass after the path migration changes.
 - [ ] **Step 8: Commit**
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 git add .gitignore AGENTS.md .agents/plugins/marketplace.json plugins scripts tests docs three-plugin-assessment.md
 git commit -m "chore: create codex plugin source repo"
 ```
@@ -459,29 +459,29 @@ git commit -m "chore: create codex plugin source repo"
 - Create: `docs/superpowers/audits/plugin-source-audit.md`
 - No deletions in this task.
 
-- [ ] **Step 1: Inventory plugin definitions under `~/Projects` and personal installs**
+- [ ] **Step 1: Inventory plugin definitions under `the local source checkout` and personal installs**
 
 Run:
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 mkdir -p docs/superpowers/audits
 {
   printf '# Codex Plugin Source Audit\n\n'
   printf '## Expected Source Of Truth\n\n'
-  printf -- '- `/Users/ncamarda/Projects/codex-personal-plugins/.agents/plugins/marketplace.json`\n'
-  printf -- '- `/Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard/.codex-plugin/plugin.json`\n'
-  printf -- '- `/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/.codex-plugin/plugin.json`\n'
-  printf -- '- `/Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor/.codex-plugin/plugin.json`\n'
-  printf -- '- Installed copies under `/Users/ncamarda/.codex/plugins/<plugin-name>/` are deploy targets, not source.\n\n'
+  printf -- '- `plugins/marketplace.json`\n'
+  printf -- '- `.codex-plugin/plugin.json`\n'
+  printf -- '- `.codex-plugin/plugin.json`\n'
+  printf -- '- `.codex-plugin/plugin.json`\n'
+  printf -- '- Installed copies under `plugins/<plugin-name>/` are deploy targets, not source.\n\n'
   printf '## Project Plugin Definitions\n\n'
-  find /Users/ncamarda/Projects \
+  find the local source checkout \
     \( -path '*/.git' -o -path '*/node_modules' -o -path '*/__pycache__' -o -path '*/.venv' \) -prune -o \
     -type f \( -path '*/.codex-plugin/plugin.json' -o -path '*/.agents/plugins/marketplace.json' -o -name 'SKILL.md' \) \
     -print | sort
   printf '\n## Personal Install Definitions\n\n'
-  find /Users/ncamarda/.codex/plugins \
-    \( -path '/Users/ncamarda/.codex/plugins/cache' -o -path '*/__pycache__' \) -prune -o \
+  find .codex/plugins \
+    \( -path 'plugins/cache' -o -path '*/__pycache__' \) -prune -o \
     -type f \( -path '*/.codex-plugin/plugin.json' -o -path '*/.agents/plugins/marketplace.json' -o -name 'SKILL.md' \) \
     -print | sort
 } > docs/superpowers/audits/plugin-source-audit.md
@@ -494,47 +494,47 @@ Expected: `docs/superpowers/audits/plugin-source-audit.md` exists and lists ever
 Run:
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 rg -n "documentation-wizard|research-partner|workspace-governor|marketplace.json|SKILL.md" docs/superpowers/audits/plugin-source-audit.md
 ```
 
 Expected allowed source paths:
 
 ```text
-/Users/ncamarda/Projects/codex-personal-plugins/.agents/plugins/marketplace.json
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard/.codex-plugin/plugin.json
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard/skills/documentation-wizard/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/.codex-plugin/plugin.json
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/assess-literature-support/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/design-robustness-tests/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/inspect-analysis-artifacts/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/research-partner/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/review-documentation-consistency/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/review-implementation-validity/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/review-scientific-interpretation/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/review-statistical-validity/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/synthesize-review/SKILL.md
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor/.codex-plugin/plugin.json
-/Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor/skills/workspace-governor/SKILL.md
+plugins/marketplace.json
+.codex-plugin/plugin.json
+documentation-wizard/SKILL.md
+.codex-plugin/plugin.json
+assess-literature-support/SKILL.md
+design-robustness-tests/SKILL.md
+inspect-analysis-artifacts/SKILL.md
+research-partner/SKILL.md
+review-documentation-consistency/SKILL.md
+review-implementation-validity/SKILL.md
+review-scientific-interpretation/SKILL.md
+review-statistical-validity/SKILL.md
+synthesize-review/SKILL.md
+.codex-plugin/plugin.json
+workspace-governor/SKILL.md
 ```
 
 Expected allowed install paths:
 
 ```text
-/Users/ncamarda/.codex/plugins/documentation-wizard/.codex-plugin/plugin.json
-/Users/ncamarda/.codex/plugins/documentation-wizard/skills/documentation-wizard/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/.codex-plugin/plugin.json
-/Users/ncamarda/.codex/plugins/research-partner/skills/assess-literature-support/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/skills/design-robustness-tests/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/skills/inspect-analysis-artifacts/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/skills/research-partner/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/skills/review-documentation-consistency/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/skills/review-implementation-validity/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/skills/review-scientific-interpretation/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/skills/review-statistical-validity/SKILL.md
-/Users/ncamarda/.codex/plugins/research-partner/skills/synthesize-review/SKILL.md
-/Users/ncamarda/.codex/plugins/workspace-governor/.codex-plugin/plugin.json
-/Users/ncamarda/.codex/plugins/workspace-governor/skills/workspace-governor/SKILL.md
+.codex-plugin/plugin.json
+documentation-wizard/SKILL.md
+.codex-plugin/plugin.json
+assess-literature-support/SKILL.md
+design-robustness-tests/SKILL.md
+inspect-analysis-artifacts/SKILL.md
+research-partner/SKILL.md
+review-documentation-consistency/SKILL.md
+review-implementation-validity/SKILL.md
+review-scientific-interpretation/SKILL.md
+review-statistical-validity/SKILL.md
+synthesize-review/SKILL.md
+.codex-plugin/plugin.json
+workspace-governor/SKILL.md
 ```
 
 Any authored `documentation-wizard`, `research-partner`, or `workspace-governor` manifest or skill path outside those lists is a conflict that must be resolved before continuing.
@@ -542,41 +542,41 @@ Any authored `documentation-wizard`, `research-partner`, or `workspace-governor`
 - [ ] **Step 3: Run the conflict detector**
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 python - <<'PY'
 from pathlib import Path
 
 audit = Path("docs/superpowers/audits/plugin-source-audit.md")
 allowed = {
-    "/Users/ncamarda/Projects/codex-personal-plugins/.agents/plugins/marketplace.json",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard/.codex-plugin/plugin.json",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard/skills/documentation-wizard/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/.codex-plugin/plugin.json",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/assess-literature-support/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/design-robustness-tests/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/inspect-analysis-artifacts/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/research-partner/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/review-documentation-consistency/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/review-implementation-validity/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/review-scientific-interpretation/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/review-statistical-validity/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner/skills/synthesize-review/SKILL.md",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor/.codex-plugin/plugin.json",
-    "/Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor/skills/workspace-governor/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/documentation-wizard/.codex-plugin/plugin.json",
-    "/Users/ncamarda/.codex/plugins/documentation-wizard/skills/documentation-wizard/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/.codex-plugin/plugin.json",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/assess-literature-support/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/design-robustness-tests/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/inspect-analysis-artifacts/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/research-partner/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/review-documentation-consistency/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/review-implementation-validity/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/review-scientific-interpretation/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/review-statistical-validity/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/research-partner/skills/synthesize-review/SKILL.md",
-    "/Users/ncamarda/.codex/plugins/workspace-governor/.codex-plugin/plugin.json",
-    "/Users/ncamarda/.codex/plugins/workspace-governor/skills/workspace-governor/SKILL.md",
+    "plugins/marketplace.json",
+    ".codex-plugin/plugin.json",
+    "documentation-wizard/SKILL.md",
+    ".codex-plugin/plugin.json",
+    "assess-literature-support/SKILL.md",
+    "design-robustness-tests/SKILL.md",
+    "inspect-analysis-artifacts/SKILL.md",
+    "research-partner/SKILL.md",
+    "review-documentation-consistency/SKILL.md",
+    "review-implementation-validity/SKILL.md",
+    "review-scientific-interpretation/SKILL.md",
+    "review-statistical-validity/SKILL.md",
+    "synthesize-review/SKILL.md",
+    ".codex-plugin/plugin.json",
+    "workspace-governor/SKILL.md",
+    ".codex-plugin/plugin.json",
+    "documentation-wizard/SKILL.md",
+    ".codex-plugin/plugin.json",
+    "assess-literature-support/SKILL.md",
+    "design-robustness-tests/SKILL.md",
+    "inspect-analysis-artifacts/SKILL.md",
+    "research-partner/SKILL.md",
+    "review-documentation-consistency/SKILL.md",
+    "review-implementation-validity/SKILL.md",
+    "review-scientific-interpretation/SKILL.md",
+    "review-statistical-validity/SKILL.md",
+    "synthesize-review/SKILL.md",
+    ".codex-plugin/plugin.json",
+    "workspace-governor/SKILL.md",
 }
 interesting_names = ("documentation-wizard", "research-partner", "workspace-governor")
 conflicts = []
@@ -598,19 +598,19 @@ print("No conflicting authored plugin definitions found.")
 PY
 ```
 
-Expected: prints `No conflicting authored plugin definitions found.` If this command fails, stop the plan and investigate each duplicate or stale authored plugin definition. If a stale copy contains useful information, merge that information into the canonical source plugin under `/Users/ncamarda/Projects/codex-personal-plugins/plugins/<plugin-name>/`. After useful information is merged, remove the stale duplicate definition from the workspace so it cannot pollute Codex discovery or future audits. Do not leave old plugin manifests, marketplace entries, or skill definitions lying around as alternate sources of truth.
+Expected: prints `No conflicting authored plugin definitions found.` If this command fails, stop the plan and investigate each duplicate or stale authored plugin definition. If a stale copy contains useful information, merge that information into the canonical source plugin under `plugins/<plugin-name>/`. After useful information is merged, remove the stale duplicate definition from the workspace so it cannot pollute Codex discovery or future audits. Do not leave old plugin manifests, marketplace entries, or skill definitions lying around as alternate sources of truth.
 
 - [ ] **Step 4: Record the cleanup decision**
 
 Append a cleanup section:
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 {
   printf '\n## Cleanup Decision\n\n'
-  printf 'Allowed source repo: `/Users/ncamarda/Projects/codex-personal-plugins`.\n'
+  printf 'Allowed source repo: `the local source checkout`.\n'
   printf 'Allowed remote: `https://github.com/nicholas-camarda/codex-personal-plugins.git`.\n'
-  printf 'Allowed personal install roots: `/Users/ncamarda/.codex/plugins/documentation-wizard`, `/Users/ncamarda/.codex/plugins/research-partner`, `/Users/ncamarda/.codex/plugins/workspace-governor`.\n'
+  printf 'Allowed personal install roots: `plugins/documentation-wizard`, `plugins/research-partner`, `plugins/workspace-governor`.\n'
   printf 'No curated cache files are source of truth.\n'
   printf 'Duplicate authored plugin definitions must be merged into canonical source if useful, then removed from discovery paths.\n'
   printf 'Conflict detector passed before implementation continued.\n'
@@ -620,7 +620,7 @@ cd /Users/ncamarda/Projects/codex-personal-plugins
 - [ ] **Step 5: Commit the audit**
 
 ```bash
-cd /Users/ncamarda/Projects/codex-personal-plugins
+cd the local source checkout
 git add docs/superpowers/audits/plugin-source-audit.md
 git commit -m "docs: audit codex plugin source definitions"
 ```
@@ -1710,9 +1710,9 @@ git commit -m "test: add plugin-local regression entry points"
 Run:
 
 ```bash
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard --format markdown > /tmp/documentation-wizard-plugin-eval.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner --format markdown > /tmp/research-partner-plugin-eval.md
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor --format markdown > /tmp/workspace-governor-plugin-eval.md
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown > /tmp/documentation-wizard-plugin-eval.md
+node scripts/plugin-eval.js analyze plugins/research-partner --format markdown > /tmp/research-partner-plugin-eval.md
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown > /tmp/workspace-governor-plugin-eval.md
 ```
 
 Expected:
@@ -1767,9 +1767,9 @@ Create `docs/superpowers/plans/2026-06-10-plugin-quality-execution-results.md` w
 - `python plugins/research-partner/scripts/research_partner.py validate`
 - `python plugins/workspace-governor/scripts/workspace_governor.py validate`
 - `python plugins/research-partner/scripts/research_partner.py run --repo tests/fixtures/research_repo --output-dir /tmp/research-partner-run-smoke`
-- `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard --format markdown`
-- `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner --format markdown`
-- `node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor --format markdown`
+- `node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown`
+- `node scripts/plugin-eval.js analyze plugins/research-partner --format markdown`
+- `node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown`
 
 ## Results
 
@@ -1850,9 +1850,9 @@ python plugins/documentation-wizard/scripts/documentation_wizard.py validate
 python plugins/research-partner/scripts/research_partner.py validate
 python plugins/workspace-governor/scripts/workspace_governor.py validate
 python plugins/research-partner/scripts/research_partner.py run --repo tests/fixtures/research_repo --output-dir /tmp/research-partner-run-smoke
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/documentation-wizard --format markdown
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/research-partner --format markdown
-node /Users/ncamarda/.codex/plugins/cache/openai-curated/plugin-eval/c6ea566d/scripts/plugin-eval.js analyze /Users/ncamarda/Projects/codex-personal-plugins/plugins/workspace-governor --format markdown
+node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown
+node scripts/plugin-eval.js analyze plugins/research-partner --format markdown
+node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown
 ```
 
 Manual acceptance checks:

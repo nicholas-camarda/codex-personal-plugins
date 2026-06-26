@@ -4,7 +4,7 @@ Date: 2026-04-09
 
 ## Scope and method
 
-This assessment is non-mutating and grounded in the live plugin workspace under `/Users/ncamarda/.codex/plugins`.
+This assessment is non-mutating and grounded in the live plugin workspace under `~/.codex/plugins`.
 
 Plugins assessed:
 - `documentation-wizard`

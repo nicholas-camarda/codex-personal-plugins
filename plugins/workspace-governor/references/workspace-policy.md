@@ -4,12 +4,19 @@ Use this reference for detailed workspace-governor behavior.
 
 ## Canonical Layout
 
-- source code: `~/Projects/<slug>`
-- runtime artifacts: `~/ProjectsRuntime/<slug>`
-- research cloud homes: `~/Library/CloudStorage/OneDrive-Personal/Research/<slug>`
-- side project cloud homes: `~/Library/CloudStorage/OneDrive-Personal/SideProjects/<slug>`
+Active project machinery lives under `~/Workspaces/<project>/`.
 
-General software repos without strong managed-layout signals stay neutral rather than being forced into Research or SideProjects.
+Each managed workspace uses:
+
+- `source/` for git repositories and source-controlled files.
+- `runtime/` for local heavy intermediates and generated scratch artifacts.
+- `results/` for local reviewed outputs that are not yet durable records.
+- `archive/` for local retired workspace material.
+- `manifest.yaml` for path ownership, old aliases, project category, and verification commands.
+
+Durable cloud records live under `~/Library/CloudStorage/OneDrive-Personal/Project Vault/<category>/<project>/`.
+
+The residency administrative root remains `~/Library/CloudStorage/OneDrive-Personal/residency`.
 
 ## Safe Flow
 
@@ -26,13 +33,7 @@ General software repos without strong managed-layout signals stay neutral rather
 
 Publish copies runtime artifacts into dated cloud snapshots. It does not run normal analysis execution in cloud storage.
 
-The publish flow assumes:
-
-- code lives under `~/Projects/<slug>`
-- runtime-only artifacts live under `~/ProjectsRuntime/<slug>`
-- cloud homes live under `~/Library/CloudStorage/OneDrive-Personal/Research/<slug>` or `~/Library/CloudStorage/OneDrive-Personal/SideProjects/<slug>`
-- ordinary software repos without strong managed-layout signals stay in a neutral `Projects` cloud home
-- public docs stay portable and `AGENTS.md` carries private operational topology
+The publish flow uses the workspace `runtime/` directory for runtime-only artifacts and writes durable records under the project's configured `Project Vault` home. Public docs stay portable and `AGENTS.md` carries private operational topology.
 
 Published artifacts are copied into dated cloud snapshots under `<cloud-home>/Analysis/<snapshot-id>`.
 
@@ -54,7 +55,7 @@ Managed projects should keep:
 
 ## Failure Recovery
 
-- backups are kept under `~/ProjectsRuntime/workspace-governor/backups`
+- backups are kept under `~/Workspaces/_system/workspace-governor/backups`
 - failed staged moves keep the source tree intact
 - failed post-copy verification rolls back the destination copy before the source is touched
 - rewrite planning is reported separately from file moves

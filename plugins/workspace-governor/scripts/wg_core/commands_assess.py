@@ -37,12 +37,21 @@ def assess(args: argparse.Namespace) -> dict[str, Any]:
         )
     )
 
-    publish_report = build_publish_report(repo_root, args.snapshot_id)
-    publish_preview_report = {
-        "command": "publish-preview",
-        "status": "ok",
-        **publish_report,
-    }
+    if dry_run_report["proposed_cloud_home"] is None:
+        publish_preview_report = {
+            "command": "publish-preview",
+            "status": "not-applicable",
+            "requires_doc_review": False,
+            "publish_candidates": {"publishable": [], "skipped": []},
+            "message": "An unmanaged repository needs an explicit cloud_home before publish preview is available.",
+        }
+    else:
+        publish_report = build_publish_report(repo_root, args.snapshot_id)
+        publish_preview_report = {
+            "command": "publish-preview",
+            "status": "ok",
+            **publish_report,
+        }
 
     repo_slug = normalized_project_slug(repo_root)
     related_records = related_audit_records(audit_report, repo_slug, str(repo_root), dry_run_report)

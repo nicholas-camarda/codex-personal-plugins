@@ -13,7 +13,14 @@ def parse_classifications(values: list[str]) -> dict[str, dict[str, str]]:
         else:
             kind, domain = spec, ""
         normalized = kind.strip().lower()
-        if normalized not in {"research", "sideproject"}:
+        if normalized not in {
+            "research",
+            "clinical_residency",
+            "personal_project",
+            "product_hardware",
+            "life_admin",
+            "archive",
+        }:
             raise ValueError(f"Invalid classification kind '{normalized}'")
         mappings[slug] = {"kind": normalized, "domain": slugify(domain) if domain else ""}
     return mappings
@@ -23,6 +30,14 @@ def parse_repo_kind(kind: str | None) -> str | None:
     if kind is None:
         return None
     normalized = kind.strip().lower()
-    if normalized not in {"research", "sideproject", "general"}:
-        raise ValueError("Repo kind must be research, sideproject, or general.")
+    if normalized not in {
+        "research",
+        "clinical_residency",
+        "personal_project",
+        "product_hardware",
+        "life_admin",
+        "archive",
+        "general",
+    }:
+        raise ValueError("Repo kind must be a Project Vault category or general.")
     return normalized

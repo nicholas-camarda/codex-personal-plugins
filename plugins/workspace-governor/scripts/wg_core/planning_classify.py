@@ -6,7 +6,7 @@ from typing import Any
 
 from . import _host
 from .metadata_profile import infer_project_profile
-from .roots import PROJECTS_ROOT, RUNTIME_ROOT
+from .roots import WORKSPACES_ROOT
 
 RUNTIME_NAME_RE = re.compile(r"(runtime|scratch|tmp|temp|cache|intermediate|work)", re.I)
 
@@ -45,10 +45,10 @@ def classify_candidate(path: Path, classifications: dict[str, dict[str, str]]) -
         )
         reason = f"explicit {classification['kind']} classification"
     elif git is not None:
-        destination = PROJECTS_ROOT / canonical_name
+        destination = WORKSPACES_ROOT / canonical_name / "source"
         reason = "legacy git repo inferred as general software repo"
     elif RUNTIME_NAME_RE.search(path.name):
-        destination = RUNTIME_ROOT / canonical_name
+        destination = WORKSPACES_ROOT / canonical_name / "runtime"
         reason = "legacy runtime/scratch naming"
     elif profile and profile["profile_guess"] in {"research", "sideproject"}:
         destination = wg.suggested_destination(path.name, profile)
