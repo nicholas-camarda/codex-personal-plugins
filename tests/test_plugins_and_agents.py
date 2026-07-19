@@ -1028,6 +1028,26 @@ class PluginEvalRegressionTests(unittest.TestCase):
                 payload["target"].startswith(str(runtime_root.resolve() / "plugin-eval" / "staging"))
             )
 
+    def test_plugins_have_no_cleared_warn_checks(self) -> None:
+        if not PLUGIN_EVAL_JS.exists():
+            self.skipTest("plugin-eval not installed")
+        from scripts.plugin_eval_regression import run_plugin_eval_json
+
+        cleared_warn_ids = {
+            "py-complexity-high",
+            "py-long-lines",
+            "coverage-artifacts-unavailable",
+        }
+        for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
+            payload = run_plugin_eval_json(PLUGINS_ROOT / plugin_name, PLUGIN_EVAL_JS)
+            warn_ids = {check["id"] for check in payload["checks"] if check.get("status") == "warn"}
+            for warn_id in cleared_warn_ids:
+                self.assertNotIn(
+                    warn_id,
+                    warn_ids,
+                    f"{plugin_name} still warns on {warn_id}",
+                )
+
     def test_research_partner_trigger_budget_is_not_heavy(self) -> None:
         if not PLUGIN_EVAL_JS.exists():
             self.skipTest("plugin-eval not installed")
