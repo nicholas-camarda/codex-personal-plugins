@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -46,12 +48,19 @@ def analyze_plugin_python(scripts_root: Path) -> dict[str, Any]:
 
 
 def run_plugin_eval_json(plugin_root: Path, plugin_eval_js: Path) -> dict[str, Any]:
-    completed = subprocess.run(
-        ["node", str(plugin_eval_js), "analyze", str(plugin_root), "--format", "json"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    repo_root = plugin_root.parents[1]
+    coverage_path = repo_root.parent / "runtime" / "plugin-eval" / plugin_root.name / "coverage.xml"
+    with tempfile.TemporaryDirectory() as tmpdir:
+        staged_root = Path(tmpdir) / plugin_root.name
+        shutil.copytree(plugin_root, staged_root, ignore=shutil.ignore_patterns("coverage.xml", "__pycache__"))
+        if coverage_path.exists():
+            shutil.copy2(coverage_path, staged_root / "coverage.xml")
+        completed = subprocess.run(
+            ["node", str(plugin_eval_js), "analyze", str(staged_root), "--format", "json"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
     return json.loads(completed.stdout)
 
 

@@ -19,6 +19,7 @@ Do not edit installed copies under `~/.codex/plugins/<plugin-name>` except throu
 
 - Keep plugin manifests, skill descriptions, helper CLIs, tests, and docs in git.
 - Do not commit Codex cache directories, installed curated plugins, generated reports, or Python cache files.
+- Write generated coverage and other evaluation artifacts under the workspace `runtime/` directory.
 - Run root tests and plugin-local tests before considering work complete.
 - After source changes, deploy into `~/.codex/plugins` with `python scripts/deploy_plugins.py install --source-root . --home ~`.
 - For research and analysis plugin behavior, distinguish data reality, method validity, implementation behavior, and scientific interpretation.

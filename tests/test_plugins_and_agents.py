@@ -824,6 +824,70 @@ if PLUGIN_EVAL_JS is None:
 
 
 class PluginEvalRegressionTests(unittest.TestCase):
+    def test_coverage_generation_writes_only_to_workspace_runtime(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sandbox = Path(tmpdir) / "workspace"
+            source_root = sandbox / "source"
+            runtime_root = sandbox / "runtime"
+            source_root.mkdir(parents=True)
+            shutil.copy2(ROOT / ".coveragerc", source_root / ".coveragerc")
+            shutil.copytree(
+                ROOT / "plugins",
+                source_root / "plugins",
+                ignore=shutil.ignore_patterns("coverage.xml", "__pycache__"),
+            )
+            shutil.copytree(ROOT / "tests", source_root / "tests")
+            (source_root / "scripts").mkdir()
+            shutil.copy2(
+                ROOT / "scripts" / "generate_plugin_coverage.py",
+                source_root / "scripts" / "generate_plugin_coverage.py",
+            )
+
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(source_root / "scripts" / "generate_plugin_coverage.py"),
+                    "--runtime-root",
+                    str(runtime_root),
+                ],
+                cwd=source_root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
+                self.assertTrue(runtime_root.joinpath("plugin-eval", plugin_name, "coverage.xml").exists())
+                self.assertFalse(source_root.joinpath("plugins", plugin_name, "coverage.xml").exists())
+            self.assertFalse((source_root / ".coverage").exists())
+
+    def test_plugin_eval_stages_runtime_coverage_without_writing_source(self) -> None:
+        from scripts.plugin_eval_regression import run_plugin_eval_json
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir) / "workspace"
+            plugin_root = workspace / "source" / "plugins" / "sample-plugin"
+            coverage_path = workspace / "runtime" / "plugin-eval" / "sample-plugin" / "coverage.xml"
+            evaluator = workspace / "fake-plugin-eval.js"
+            plugin_root.mkdir(parents=True)
+            coverage_path.parent.mkdir(parents=True)
+            (plugin_root / "README.md").write_text("# Sample\n", encoding="utf-8")
+            coverage_path.write_text("<coverage line-rate=\"1\"></coverage>\n", encoding="utf-8")
+            evaluator.write_text(
+                "const fs = require('fs');\n"
+                "const target = process.argv[3];\n"
+                "const found = fs.existsSync(target + '/coverage.xml');\n"
+                "process.stdout.write(JSON.stringify({checks: found ? [] : "
+                "[{id: 'coverage-artifacts-unavailable', status: 'warn'}]}));\n",
+                encoding="utf-8",
+            )
+
+            payload = run_plugin_eval_json(plugin_root, evaluator)
+
+            self.assertEqual(payload["checks"], [])
+            self.assertFalse((plugin_root / "coverage.xml").exists())
+
     def test_plugin_eval_baseline_file_exists(self) -> None:
         baseline_path = ROOT / "tests" / "plugin_eval_baseline.json"
         self.assertTrue(baseline_path.exists(), "missing tests/plugin_eval_baseline.json")
@@ -889,9 +953,9 @@ class PluginEvalRegressionTests(unittest.TestCase):
         metrics = analyze_plugin_python(PLUGINS_ROOT / "research-partner" / "scripts")
         self.assertLess(metrics["max_complexity"], 18)
 
-    def test_plugins_have_local_coverage_artifacts(self) -> None:
+    def test_plugins_have_runtime_coverage_artifacts(self) -> None:
         for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
-            coverage_path = PLUGINS_ROOT / plugin_name / "coverage.xml"
+            coverage_path = ROOT.parent / "runtime" / "plugin-eval" / plugin_name / "coverage.xml"
             self.assertTrue(coverage_path.exists(), f"missing {coverage_path}")
             text = coverage_path.read_text(encoding="utf-8")
             self.assertIn("coverage", text)
