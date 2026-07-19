@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from plugin_eval_paths import resolve_runtime_root
+
 PLUGINS = [
     "documentation-wizard",
     "research-partner",
@@ -13,7 +15,8 @@ PLUGINS = [
 ]
 
 
-def generate_for_plugin(repo_root: Path, runtime_root: Path, plugin_name: str) -> Path:
+def generate_for_plugin(repo_root: Path, runtime_root: Path | None, plugin_name: str) -> Path:
+    runtime_root = resolve_runtime_root(repo_root, runtime_root)
     source = f"plugins/{plugin_name}/scripts"
     test_dir = f"tests/plugins/{plugin_name}"
     output_dir = runtime_root / "plugin-eval" / plugin_name
@@ -49,10 +52,13 @@ def generate_for_plugin(repo_root: Path, runtime_root: Path, plugin_name: str) -
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate Plugin Eval coverage in workspace runtime.")
-    parser.add_argument("--runtime-root", type=Path, required=True)
+    parser.add_argument("--runtime-root", type=Path)
     args = parser.parse_args()
     repo_root = Path(__file__).resolve().parents[1]
-    runtime_root = args.runtime_root.expanduser().resolve()
+    try:
+        runtime_root = resolve_runtime_root(repo_root, args.runtime_root)
+    except ValueError as exc:
+        parser.error(str(exc))
     for plugin_name in PLUGINS:
         path = generate_for_plugin(repo_root, runtime_root, plugin_name)
         print(f"wrote {path}")

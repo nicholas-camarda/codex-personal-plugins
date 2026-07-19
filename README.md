@@ -112,7 +112,7 @@ python plugins/workspace-governor/scripts/workspace_governor.py validate
 Generate per-plugin coverage artifacts for Plugin Eval in workspace runtime:
 
 ```bash
-python scripts/generate_plugin_coverage.py --runtime-root ../runtime
+python scripts/generate_plugin_coverage.py
 ```
 
 Run the research-partner smoke review:
@@ -128,9 +128,9 @@ python plugins/research-partner/scripts/research_partner.py run \
 Run Plugin Eval against each plugin:
 
 ```bash
-node scripts/plugin-eval.js analyze plugins/documentation-wizard --format markdown
-node scripts/plugin-eval.js analyze plugins/research-partner --format markdown
-node scripts/plugin-eval.js analyze plugins/workspace-governor --format markdown
+python scripts/run_plugin_eval.py analyze plugins/documentation-wizard --format markdown
+python scripts/run_plugin_eval.py analyze plugins/research-partner --format markdown
+python scripts/run_plugin_eval.py analyze plugins/workspace-governor --format markdown
 ```
 
 ## Development Notes
