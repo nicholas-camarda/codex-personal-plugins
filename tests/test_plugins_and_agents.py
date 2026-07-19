@@ -1,5 +1,6 @@
 import argparse
 import importlib.util
+import inspect
 import json
 import os
 import shutil
@@ -824,6 +825,89 @@ if PLUGIN_EVAL_JS is None:
 
 
 class PluginEvalRegressionTests(unittest.TestCase):
+    def test_coverage_generation_writes_only_to_workspace_runtime(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sandbox = Path(tmpdir) / "workspace"
+            source_root = sandbox / "source"
+            runtime_root = sandbox / "runtime"
+            source_root.mkdir(parents=True)
+            shutil.copy2(ROOT / ".coveragerc", source_root / ".coveragerc")
+            shutil.copytree(
+                ROOT / "plugins",
+                source_root / "plugins",
+                ignore=shutil.ignore_patterns("coverage.xml", "__pycache__"),
+            )
+            shutil.copytree(ROOT / "tests", source_root / "tests")
+            (source_root / "scripts").mkdir()
+            shutil.copy2(
+                ROOT / "scripts" / "generate_plugin_coverage.py",
+                source_root / "scripts" / "generate_plugin_coverage.py",
+            )
+            shutil.copy2(
+                ROOT / "scripts" / "plugin_eval_paths.py",
+                source_root / "scripts" / "plugin_eval_paths.py",
+            )
+
+            unsafe = subprocess.run(
+                [
+                    sys.executable,
+                    str(source_root / "scripts" / "generate_plugin_coverage.py"),
+                    "--runtime-root",
+                    str(source_root / "generated"),
+                ],
+                cwd=source_root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertNotEqual(unsafe.returncode, 0)
+            self.assertIn("must not be inside source", unsafe.stderr)
+
+            completed = subprocess.run(
+                [sys.executable, str(source_root / "scripts" / "generate_plugin_coverage.py")],
+                cwd=source_root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
+                self.assertTrue(runtime_root.joinpath("plugin-eval", plugin_name, "coverage.xml").exists())
+                self.assertFalse(source_root.joinpath("plugins", plugin_name, "coverage.xml").exists())
+            self.assertFalse((source_root / ".coverage").exists())
+
+    def test_plugin_eval_uses_shared_runtime_override_and_excludes_coverage(self) -> None:
+        from scripts.plugin_eval_regression import run_plugin_eval_json
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir) / "workspace"
+            plugin_root = workspace / "source" / "plugins" / "sample-plugin"
+            runtime_root = workspace / "custom-runtime"
+            coverage_path = runtime_root / "plugin-eval" / "sample-plugin" / "coverage.xml"
+            evaluator = workspace / "fake-plugin-eval.js"
+            plugin_root.mkdir(parents=True)
+            coverage_path.parent.mkdir(parents=True)
+            (plugin_root / "README.md").write_text("# Sample\n", encoding="utf-8")
+            coverage_path.write_text("<coverage line-rate=\"1\"></coverage>\n", encoding="utf-8")
+            evaluator.write_text(
+                "const fs = require('fs');\n"
+                "const target = process.argv[3];\n"
+                "const found = fs.existsSync(target + '/coverage.xml');\n"
+                "process.stdout.write(JSON.stringify({checks: found ? "
+                "[{id: 'coverage-leaked-into-eval', status: 'fail'}] : [], target}));\n",
+                encoding="utf-8",
+            )
+
+            self.assertIn("runtime_root", inspect.signature(run_plugin_eval_json).parameters)
+            payload = run_plugin_eval_json(plugin_root, evaluator, runtime_root=runtime_root)
+
+            self.assertEqual(payload["checks"], [])
+            self.assertTrue(
+                payload["target"].startswith(str(runtime_root.resolve() / "plugin-eval" / "staging"))
+            )
+            self.assertFalse((plugin_root / "coverage.xml").exists())
+
     def test_plugin_eval_baseline_file_exists(self) -> None:
         baseline_path = ROOT / "tests" / "plugin_eval_baseline.json"
         self.assertTrue(baseline_path.exists(), "missing tests/plugin_eval_baseline.json")
@@ -889,13 +973,60 @@ class PluginEvalRegressionTests(unittest.TestCase):
         metrics = analyze_plugin_python(PLUGINS_ROOT / "research-partner" / "scripts")
         self.assertLess(metrics["max_complexity"], 18)
 
-    def test_plugins_have_local_coverage_artifacts(self) -> None:
+    def test_plugins_have_runtime_coverage_artifacts(self) -> None:
         for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
-            coverage_path = PLUGINS_ROOT / plugin_name / "coverage.xml"
+            coverage_path = ROOT.parent / "runtime" / "plugin-eval" / plugin_name / "coverage.xml"
             self.assertTrue(coverage_path.exists(), f"missing {coverage_path}")
             text = coverage_path.read_text(encoding="utf-8")
             self.assertIn("coverage", text)
             self.assertIn("line-rate", text)
+
+    def test_readme_plugin_eval_entrypoint_exists_and_executes(self) -> None:
+        entrypoint = ROOT / "scripts" / "run_plugin_eval.py"
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        documented_command = (
+            "python scripts/run_plugin_eval.py analyze "
+            "plugins/documentation-wizard --format markdown"
+        )
+        self.assertTrue(entrypoint.is_file(), f"missing {entrypoint}")
+        self.assertIn(documented_command, readme)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir) / "workspace"
+            plugin_root = workspace / "source" / "plugins" / "sample-plugin"
+            runtime_root = workspace / "runtime"
+            evaluator = workspace / "fake-plugin-eval.js"
+            plugin_root.mkdir(parents=True)
+            (plugin_root / "README.md").write_text("# Sample\n", encoding="utf-8")
+            evaluator.write_text(
+                "const target = process.argv[3];\n"
+                "process.stdout.write(JSON.stringify({target}));\n",
+                encoding="utf-8",
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(entrypoint),
+                    "analyze",
+                    str(plugin_root),
+                    "--format",
+                    "json",
+                    "--runtime-root",
+                    str(runtime_root),
+                    "--plugin-eval-js",
+                    str(evaluator),
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            payload = json.loads(completed.stdout)
+            self.assertTrue(
+                payload["target"].startswith(str(runtime_root.resolve() / "plugin-eval" / "staging"))
+            )
 
     def test_plugins_have_no_cleared_warn_checks(self) -> None:
         if not PLUGIN_EVAL_JS.exists():
@@ -936,6 +1067,14 @@ class PluginEvalRegressionTests(unittest.TestCase):
         baseline = json.loads((ROOT / "tests" / "plugin_eval_baseline.json").read_text(encoding="utf-8"))
         for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
             payload = run_plugin_eval_json(PLUGINS_ROOT / plugin_name, PLUGIN_EVAL_JS)
+            deferred_paths = [
+                component["path"]
+                for component in payload["budgets"]["deferred_cost_tokens"]["components"]
+            ]
+            self.assertFalse(
+                any(path.endswith("coverage.xml") for path in deferred_paths),
+                f"{plugin_name} evaluation includes coverage.xml",
+            )
             current = payload["budgets"]["deferred_cost_tokens"]["value"]
             previous = baseline["plugins"][plugin_name]["deferred_cost_tokens"]
             self.assertLessEqual(

@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
+
+from scripts.plugin_eval_paths import plugin_eval_staging_root
 
 DECISION_PATTERNS = [
     re.compile(r"\bif\b"),
@@ -45,12 +49,42 @@ def analyze_plugin_python(scripts_root: Path) -> dict[str, Any]:
     }
 
 
-def run_plugin_eval_json(plugin_root: Path, plugin_eval_js: Path) -> dict[str, Any]:
-    completed = subprocess.run(
-        ["node", str(plugin_eval_js), "analyze", str(plugin_root), "--format", "json"],
-        check=True,
-        capture_output=True,
-        text=True,
+def run_plugin_eval(
+    plugin_root: Path,
+    plugin_eval_js: Path,
+    *,
+    output_format: str,
+    runtime_root: Path | None = None,
+) -> subprocess.CompletedProcess[str]:
+    repo_root = plugin_root.parents[1]
+    staging_root = plugin_eval_staging_root(repo_root, runtime_root)
+    staging_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=staging_root) as tmpdir:
+        staged_root = Path(tmpdir) / plugin_root.name
+        shutil.copytree(
+            plugin_root,
+            staged_root,
+            ignore=shutil.ignore_patterns(".coverage", "coverage.xml", "__pycache__"),
+        )
+        return subprocess.run(
+            ["node", str(plugin_eval_js), "analyze", str(staged_root), "--format", output_format],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+
+def run_plugin_eval_json(
+    plugin_root: Path,
+    plugin_eval_js: Path,
+    *,
+    runtime_root: Path | None = None,
+) -> dict[str, Any]:
+    completed = run_plugin_eval(
+        plugin_root,
+        plugin_eval_js,
+        output_format="json",
+        runtime_root=runtime_root,
     )
     return json.loads(completed.stdout)
 
