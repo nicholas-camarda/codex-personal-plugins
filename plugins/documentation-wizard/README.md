@@ -12,7 +12,9 @@ Invoke it directly in the composer with `@documentation-wizard`, then describe t
 - extracts CLI flags from Python CLI surfaces, config schema keys, and referenced paths
 - reports documentation drift with severity and source-of-truth references
 - flags maintainer-only infrastructure leaking into public docs
-- offers sanitization that rewrites public docs while preserving `AGENTS.md` path truth
+- triages machine paths before proposing changes: broken links, machine-specific instructions, portable paths, generated-output examples, and unresolved external locations
+- recommends repo-relative paths for tracked content and documented configuration for external locations
+- offers approved, reviewable sanitization while preserving `AGENTS.md` path truth
 
 ## Helper script
 

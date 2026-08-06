@@ -1,6 +1,6 @@
 {
   "name": "documentation-wizard",
-  "version": "0.2.0",
+  "version": "0.2.0+codex.20260805131022",
   "description": "Audits documentation against verified code interfaces and generates evidence-backed drift reports.",
   "author": {
     "name": "Nick Camarda"
@@ -29,7 +29,8 @@
     "defaultPrompt": [
       "Audit this repo's docs against the live CLI and config surface.",
       "Generate a docs drift report with exact source-of-truth references.",
-      "Create a lightweight regression check for doc drift in this project."
+      "Create a lightweight regression check for doc drift in this project.",
+      "Help me triage machine paths in these docs before proposing any edits."
     ],
     "brandColor": "#0E7490",
     "composerIcon": "./assets/documentation-wizard-icon.svg",

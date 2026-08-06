@@ -21,6 +21,20 @@ Public docs should remain portable. Maintainer-specific infrastructure belongs i
 
 `validate` confirms the plugin bundle is registered and its manifest, skill, and assets are present.
 
+## Machine Path Triage
+
+Treat requests to fix machine paths as a diagnosis task first, not as an automatic public-doc rewrite. Start with `report` and `interfaces`, then inspect the cited documentation when path-like examples need context.
+
+Classify each relevant reference as broken in-repo, valid but machine-specific, portable repo-relative, generated-output/example, or unresolved external. Report the document location, direct evidence, user impact, and recommended repair. A missing artifact path or date-stamped output is not automatically a broken link.
+
+Use the following repair order:
+
+1. Use a repo-relative path for a target tracked with the repository.
+2. Use a documented environment variable or configuration key for a genuine machine-local or external target.
+3. Keep a literal machine path only in `AGENTS.md` or clearly internal operational docs when it remains necessary.
+
+If more than one in-repo target plausibly repairs a broken reference, present the verified candidates and ask the user to choose. Do not guess. Present a concrete replacement preview and receive explicit approval before modifying documentation.
+
 ## Public Vs Private Docs
 
 The intended policy is:
@@ -32,6 +46,7 @@ The intended policy is:
   - Legacy local or synced roots such as `Projects`, `ProjectsRuntime`, `Research`, and `SideProjects`.
 - private operational details should live in `AGENTS.md` or clearly internal docs such as `.local.md`
 - `sanitize-public-docs` rewrites the public side only; it does not touch `AGENTS.md`
+- `sanitize-public-docs` is an explicit approved action, not the default response to a machine-path request
 
 ## Limits
 
