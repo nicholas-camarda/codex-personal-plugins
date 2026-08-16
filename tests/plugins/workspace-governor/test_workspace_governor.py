@@ -1,6 +1,7 @@
 import argparse
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -24,6 +25,46 @@ WORKSPACE_GOVERNOR = load_module()
 
 
 class WorkspaceGovernorLocalTests(unittest.TestCase):
+    def test_dry_run_honors_existing_split_workspace_registry_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_home = Path(tmpdir) / "Workspaces" / "uveal-melanoma"
+            repo_root = workspace_home / "source"
+            repo_root.mkdir(parents=True)
+            project_vault_home = (
+                Path(tmpdir) / "Project Vault" / "Research" / "uveal-melanoma"
+            )
+            (repo_root / "README.md").write_text("# Uveal Melanoma\n", encoding="utf-8")
+            (repo_root / "AGENTS.md").write_text("# Private path contract\n", encoding="utf-8")
+            (repo_root / "analysis_registry.yaml").write_text(
+                "\n".join(
+                    [
+                        "project_slug: uveal_melanoma",
+                        "repository_slug: uveal-melanoma",
+                        "project_type: research",
+                        f"workspace_home: {workspace_home}",
+                        f"source_home: {repo_root}",
+                        f"runtime_home: {workspace_home / 'runtime'}",
+                        f"results_home: {workspace_home / 'results'}",
+                        f"project_vault_home: {project_vault_home}",
+                        f"raw_home: {project_vault_home / 'Original Files'}",
+                        f"publish_home: {project_vault_home / 'outputs'}",
+                        "publish_root_name: outputs",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            profile = WORKSPACE_GOVERNOR.infer_project_profile(repo_root, repo_root.name)
+            dry_run = WORKSPACE_GOVERNOR.build_dry_run_plan(repo_root, profile)
+
+        self.assertTrue(dry_run["registry_review"]["supported"])
+        self.assertIsNone(dry_run["proposed_destination"])
+        self.assertEqual(dry_run["proposed_code_root"], str(repo_root))
+        self.assertEqual(dry_run["proposed_runtime_root"], str(workspace_home / "runtime"))
+        self.assertEqual(dry_run["proposed_cloud_home"], str(project_vault_home))
+        self.assertEqual(dry_run["questions"], [])
+
     def test_assess_smoke_on_research_fixture(self) -> None:
         fixtures_root = WORKSPACE_ROOT / "tests" / "fixtures"
         repo_root = fixtures_root / "research_repo"

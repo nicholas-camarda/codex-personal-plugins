@@ -6,9 +6,13 @@ from typing import Any
 from .destination_questions_profile import footprint_questions, profile_questions
 
 
-def build_dry_run_questions(profile: dict[str, Any], destination: Path | None) -> list[str]:
+def build_dry_run_questions(
+    profile: dict[str, Any], destination: Path | None, *, already_canonical: bool = False
+) -> list[str]:
     questions = profile_questions(profile)
     questions.extend(footprint_questions(profile))
+    if already_canonical:
+        return questions
     if destination is None:
         if profile["profile_guess"] == "general":
             questions.append("If this repo needs a managed destination, what root should it use?")

@@ -5,8 +5,8 @@ from typing import Any
 
 from . import _host
 from .planning_classify import classify_candidate as classify_candidate
+from .planning_topology import resolve_code_plan
 from .publish_deny import GLOBAL_PUBLISH_DENYLIST
-from .roots import WORKSPACES_ROOT
 
 
 def build_dry_run_plan(
@@ -16,7 +16,9 @@ def build_dry_run_plan(
 ) -> dict[str, Any]:
     wg = _host.wg()
     classification = (classifications or {}).get(wg.slugify(repo_root.name))
-    destination = wg.suggested_destination(repo_root.name, profile, classification)
+    destination, code_root, code_root_source, already_canonical = resolve_code_plan(
+        repo_root, profile, classification
+    )
     runtime_home, runtime_source = wg.configured_runtime_home(repo_root)
     cloud_home, cloud_source = wg.configured_cloud_home(repo_root, profile["profile_guess"])
     publish_root_name, publish_root_source = wg.configured_publish_root_name(repo_root)
@@ -45,9 +47,8 @@ def build_dry_run_plan(
         "metadata": profile["metadata"],
         "existing_footprints": profile["existing_footprints"],
         "proposed_destination": str(destination) if destination else None,
-        "proposed_code_root": str(WORKSPACES_ROOT / wg.normalized_project_slug(repo_root) / "source")
-        if destination
-        else None,
+        "proposed_code_root": str(code_root) if code_root else None,
+        "proposed_code_root_source": code_root_source,
         "proposed_runtime_root": str(runtime_home),
         "proposed_cloud_home": str(cloud_home) if cloud_home else None,
         "publish_root_name": publish_root_name,
@@ -62,7 +63,9 @@ def build_dry_run_plan(
         },
         "registry_review": profile["metadata"].get("registry_review"),
         "rewrite_candidates": wg.rewrite_candidates(repo_root, destination),
-        "questions": wg.build_dry_run_questions(question_profile, destination),
+        "questions": wg.build_dry_run_questions(
+            question_profile, destination, already_canonical=already_canonical
+        ),
         "signals": profile,
     }
 

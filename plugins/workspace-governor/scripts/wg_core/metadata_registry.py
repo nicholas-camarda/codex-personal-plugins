@@ -7,11 +7,18 @@ from typing import Any
 from .metadata_parse_scalar import load_text
 
 SUPPORTED_ANALYSIS_REGISTRY_KEYS = {
+    "repository_slug",
     "project_slug",
     "project_type",
     "domain",
     "cloud_home",
+    "workspace_home",
+    "source_home",
     "runtime_home",
+    "results_home",
+    "project_vault_home",
+    "raw_home",
+    "publish_home",
     "publish_root_name",
     "publish_layout",
     "publish_denylist",
