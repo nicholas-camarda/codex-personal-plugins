@@ -19,3 +19,9 @@ node_modules/
 
 # Claude Code session worktrees
 .claude/worktrees/
+
+# Workspace files at the repo root (also in the global ignore)
+/runtime/
+/archive/
+/manifest.yaml
+CLAUDE.md
