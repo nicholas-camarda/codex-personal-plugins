@@ -13,6 +13,17 @@ def apply_one(item: dict[str, Any], backup_root: Path, generation: str) -> dict[
     return _apply_one(item, backup_root, generation, _host.wg())
 
 
+def ordered_plan(plan: list[Any]) -> list[dict[str, Any]]:
+    """Order moves so a destination is created before moves into it.
+
+    A repo moves to ~/Workspaces/<slug> and its runtime tree to ~/Workspaces/<slug>/runtime.
+    Each move needs an absent destination, so the repo must land first. Moves with equally deep
+    destinations keep their audit order.
+    """
+    items = [item for item in plan if isinstance(item, dict)]
+    return sorted(items, key=lambda item: len(Path(item["destination"]).expanduser().parts))
+
+
 def _noop_manifest(args: argparse.Namespace, wg: Any) -> dict[str, Any]:
     manifest = {
         "command": "apply",
@@ -51,9 +62,7 @@ def apply_plan(args: argparse.Namespace) -> dict[str, Any]:
     generated_at = audit_payload.get("generated_at", wg.now_stamp())
     backup_root = Path(args.backup_root or DEFAULT_BACKUP_ROOT).expanduser().resolve() / generated_at
     backup_root.mkdir(parents=True, exist_ok=True)
-    results = [
-        apply_one(item, backup_root, generated_at) for item in plan if isinstance(item, dict)
-    ]
+    results = [apply_one(item, backup_root, generated_at) for item in ordered_plan(plan)]
     failures = [item for item in results if item["status"] in {"failed", "cleanup-failed"}]
 
     manifest = {

@@ -40,8 +40,8 @@ def configured_source_home(repo_root: Path) -> tuple[Path, str]:
     explicit, source = metadata_value(repo_root, "source_home")
     if explicit:
         return Path(explicit).expanduser(), source or "analysis_registry"
-    workspace_home, workspace_source = configured_workspace_home(repo_root)
-    return workspace_home / "source", workspace_source
+    # The project folder is the Git repo: runtime/, archive/ and manifest.yaml sit at its root.
+    return configured_workspace_home(repo_root)
 
 
 def configured_runtime_home(repo_root: Path) -> tuple[Path, str]:
