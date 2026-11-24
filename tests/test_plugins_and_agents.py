@@ -58,6 +58,7 @@ DEPLOY_PLUGINS = load_module(
 from rp_core import workspace_roots as RESEARCH_PARTNER_ROOTS
 from wg_core import roots as WORKSPACE_GOVERNOR_ROOTS
 from wg_core.destination_questions_profile import profile_questions
+from scripts.plugin_eval_paths import main_checkout_root
 
 FIXTURES_ROOT = ROOT / "tests" / "fixtures"
 
@@ -87,7 +88,7 @@ class PluginRegressionTests(unittest.TestCase):
             WORKSPACE_GOVERNOR.suggested_destination(
                 "research-fixture", {"profile_guess": "research"}
             ),
-            WORKSPACE_GOVERNOR_ROOTS.WORKSPACES_ROOT / "research-fixture" / "source",
+            WORKSPACE_GOVERNOR_ROOTS.WORKSPACES_ROOT / "research-fixture",
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir) / "research-fixture"
@@ -827,9 +828,9 @@ if PLUGIN_EVAL_JS is None:
 class PluginEvalRegressionTests(unittest.TestCase):
     def test_coverage_generation_writes_only_to_workspace_runtime(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            sandbox = Path(tmpdir) / "workspace"
-            source_root = sandbox / "source"
-            runtime_root = sandbox / "runtime"
+            # Flat layout: the project folder is the repo and runtime/ sits at its root.
+            source_root = Path(tmpdir) / "workspace"
+            runtime_root = source_root / "runtime"
             source_root.mkdir(parents=True)
             shutil.copy2(ROOT / ".coveragerc", source_root / ".coveragerc")
             shutil.copytree(
@@ -861,7 +862,7 @@ class PluginEvalRegressionTests(unittest.TestCase):
                 check=False,
             )
             self.assertNotEqual(unsafe.returncode, 0)
-            self.assertIn("must not be inside source", unsafe.stderr)
+            self.assertIn("must not be inside the repo except its runtime/ folder", unsafe.stderr)
 
             completed = subprocess.run(
                 [sys.executable, str(source_root / "scripts" / "generate_plugin_coverage.py")],
@@ -975,7 +976,7 @@ class PluginEvalRegressionTests(unittest.TestCase):
 
     def test_plugins_have_runtime_coverage_artifacts(self) -> None:
         for plugin_name in ["documentation-wizard", "research-partner", "workspace-governor"]:
-            coverage_path = ROOT.parent / "runtime" / "plugin-eval" / plugin_name / "coverage.xml"
+            coverage_path = main_checkout_root(ROOT) / "runtime" / "plugin-eval" / plugin_name / "coverage.xml"
             self.assertTrue(coverage_path.exists(), f"missing {coverage_path}")
             text = coverage_path.read_text(encoding="utf-8")
             self.assertIn("coverage", text)

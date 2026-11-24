@@ -65,6 +65,44 @@ class WorkspaceGovernorLocalTests(unittest.TestCase):
         self.assertEqual(dry_run["proposed_cloud_home"], str(project_vault_home))
         self.assertEqual(dry_run["questions"], [])
 
+    def test_flat_workspace_repo_is_its_own_code_root(self) -> None:
+        """The project folder is the Git repo; runtime/ sits inside it, with no source/ subfolder."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_home = Path(tmpdir) / "Workspaces" / "flat-fixture"
+            repo_root = workspace_home
+            repo_root.mkdir(parents=True)
+            project_vault_home = Path(tmpdir) / "Project Vault" / "Research" / "flat-fixture"
+            (repo_root / "README.md").write_text("# Flat fixture\n", encoding="utf-8")
+            (repo_root / "AGENTS.md").write_text("# Private path contract\n", encoding="utf-8")
+            (repo_root / "analysis_registry.yaml").write_text(
+                "\n".join(
+                    [
+                        "project_slug: flat-fixture",
+                        "repository_slug: flat-fixture",
+                        "project_type: research",
+                        f"workspace_home: {workspace_home}",
+                        f"project_vault_home: {project_vault_home}",
+                        f"publish_home: {project_vault_home / 'outputs'}",
+                        "publish_root_name: outputs",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            source_home, _ = WORKSPACE_GOVERNOR.configured_source_home(repo_root)
+            profile = WORKSPACE_GOVERNOR.infer_project_profile(repo_root, repo_root.name)
+            dry_run = WORKSPACE_GOVERNOR.build_dry_run_plan(repo_root, profile)
+
+        self.assertEqual(source_home, workspace_home)
+        self.assertIsNone(dry_run["proposed_destination"])
+        self.assertEqual(dry_run["proposed_code_root"], str(repo_root))
+        self.assertEqual(dry_run["proposed_runtime_root"], str(workspace_home / "runtime"))
+        self.assertEqual(
+            WORKSPACE_GOVERNOR.suggested_destination("flat-fixture", {"profile_guess": "research"}).name,
+            "flat-fixture",
+        )
+
     def test_assess_smoke_on_research_fixture(self) -> None:
         fixtures_root = WORKSPACE_ROOT / "tests" / "fixtures"
         repo_root = fixtures_root / "research_repo"

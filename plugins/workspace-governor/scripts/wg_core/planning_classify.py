@@ -45,7 +45,7 @@ def classify_candidate(path: Path, classifications: dict[str, dict[str, str]]) -
         )
         reason = f"explicit {classification['kind']} classification"
     elif git is not None:
-        destination = WORKSPACES_ROOT / canonical_name / "source"
+        destination = WORKSPACES_ROOT / canonical_name
         reason = "legacy git repo inferred as general software repo"
     elif RUNTIME_NAME_RE.search(path.name):
         destination = WORKSPACES_ROOT / canonical_name / "runtime"

@@ -59,10 +59,10 @@ def suggested_destination(
 ) -> Path | None:
     slug = canonical_project_name(repo_name)
     if classification:
-        return WORKSPACES_ROOT / slug / "source"
+        return WORKSPACES_ROOT / slug
     if profile["profile_guess"] == "general":
         return None
-    return WORKSPACES_ROOT / slug / "source"
+    return WORKSPACES_ROOT / slug
 
 
 __all__ = [

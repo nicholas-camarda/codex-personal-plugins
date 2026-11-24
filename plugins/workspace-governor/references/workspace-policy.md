@@ -6,13 +6,15 @@ Use this reference for detailed workspace-governor behavior.
 
 Active project machinery lives under `~/Workspaces/<project>/`.
 
-Each managed workspace uses:
+Each managed workspace is itself the Git repository. At its root:
 
-- `source/` for git repositories and source-controlled files.
-- `runtime/` for local heavy intermediates and generated scratch artifacts.
-- `results/` for local reviewed outputs that are not yet durable records.
-- `archive/` for local retired workspace material.
-- `manifest.yaml` for path ownership, old aliases, project category, and verification commands.
+- `runtime/` holds local heavy intermediates and generated scratch artifacts.
+- `archive/` holds local retired workspace material.
+- `manifest.yaml` records path ownership, old aliases, project category, and verification commands.
+
+None of these three is tracked. The project `.gitignore` lists them anchored to the root (`/runtime/`, `/archive/`, `/manifest.yaml`), the global `~/.config/git/ignore` lists them too, and `.git/hooks/pre-commit` links `~/.config/git/hooks/workspace-guard`, which refuses them and data files outside `tests/`. Nested folders with the same names, such as `openspec/changes/archive/`, are not affected.
+
+Git worktrees, whether manual, Codex or Claude Code, go under `.claude/worktrees/<task>/`, which is ignored. Code resolves `runtime/` from the main checkout, never from the current worktree. There is no `source/` subfolder and no top-level `worktrees/` folder.
 
 Durable cloud records live under `~/Library/CloudStorage/OneDrive-Personal/Project Vault/<category>/<project>/`.
 
