@@ -68,6 +68,7 @@ Managed projects should keep:
 - ambiguous project classification still requires explicit user input
 - weakly signaled ordinary repos are treated as general software projects
 - destinations must be absent before apply; no automatic merge is attempted
+- apply moves a repo into `~/Workspaces/<slug>` before any move into that folder (such as its `runtime/`); a repo cannot move into a workspace folder that already exists
 - repos already in the canonical layout may legitimately produce no move plan
 - publish sanitization is rule-based and should still be reviewed by a human
 

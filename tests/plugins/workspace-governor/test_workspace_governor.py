@@ -103,6 +103,24 @@ class WorkspaceGovernorLocalTests(unittest.TestCase):
             "flat-fixture",
         )
 
+    def test_apply_moves_repo_before_its_runtime(self) -> None:
+        """A runtime tree lands inside the repo's folder, so the repo must move first."""
+        from wg_core.verification_apply import ordered_plan
+
+        plan = [
+            {"source": "/legacy/ProjectsRuntime/foo", "destination": "/w/Workspaces/foo/runtime"},
+            {"source": "/legacy/Projects/foo", "destination": "/w/Workspaces/foo"},
+            "not-a-move",
+            {"source": "/legacy/Projects/bar", "destination": "/w/Workspaces/bar"},
+        ]
+
+        destinations = [item["destination"] for item in ordered_plan(plan)]
+
+        self.assertEqual(
+            destinations,
+            ["/w/Workspaces/foo", "/w/Workspaces/bar", "/w/Workspaces/foo/runtime"],
+        )
+
     def test_assess_smoke_on_research_fixture(self) -> None:
         fixtures_root = WORKSPACE_ROOT / "tests" / "fixtures"
         repo_root = fixtures_root / "research_repo"
